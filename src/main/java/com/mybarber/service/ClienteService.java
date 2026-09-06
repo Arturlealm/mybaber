@@ -42,13 +42,12 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
-    public boolean deletar(Long id){
+    public void deletar(Long id){
 
         if (!clienteRepository.existsById(id)) {
-            return false;
+            throw new RecursoNaoEncontradoException("Cliente não encontrado com id: " + id);
         }
 
         clienteRepository.deleteById(id);
-        return true;
     }
 }
