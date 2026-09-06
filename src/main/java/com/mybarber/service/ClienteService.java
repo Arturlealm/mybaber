@@ -23,4 +23,33 @@ public class ClienteService {
     public Cliente salvar(Cliente cliente){
         return clienteRepository.save(cliente);
     }
+
+    public Cliente buscarPorId(Long id){
+        return clienteRepository.findById(id).orElse(null);
+    }
+
+    public Cliente atualizar(Long id, Cliente clienteAtualizado){
+         
+        Cliente cliente = clienteRepository.findById(id).orElse(null);
+
+        if (cliente == null) {
+            return null;
+        }
+
+        cliente.setNome(clienteAtualizado.getNome());
+        cliente.setTelefone(clienteAtualizado.getTelefone());
+        cliente.setEmail(clienteAtualizado.getEmail());
+
+        return clienteRepository.save(cliente);
+    }
+
+    public boolean deletar(Long id){
+
+        if (!clienteRepository.existsById(id)) {
+            return false;
+        }
+
+        clienteRepository.deleteById(id);
+        return true;
+    }
 }
