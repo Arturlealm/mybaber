@@ -37,7 +37,7 @@ public class ClienteController {
     public ResponseEntity<Cliente> salvar(@Valid @RequestBody Cliente cliente){
         
         Cliente clienteSalvo = clienteService.salvar(cliente);
-
+            
         return ResponseEntity.status(HttpStatus.CREATED).body(clienteSalvo);
 
     }

@@ -6,5 +6,7 @@ import com.mybarber.model.Cliente;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
-    
+    boolean existsByEmail(String email);
+    boolean existsByCpf(String cpf);
+
 }

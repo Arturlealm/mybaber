@@ -22,6 +22,14 @@ public class ClienteService {
     }
 
     public Cliente salvar(Cliente cliente){
+
+        if (clienteRepository.existsByEmail(cliente.getEmail())) {
+            throw new IllegalArgumentException("Email já cadastrado");
+        }
+        if (clienteRepository.existsByCpf(cliente.getCpf())) {
+            throw new IllegalArgumentException("CPF já cadastrado");
+        }
+
         return clienteRepository.save(cliente);
     }
 
@@ -38,6 +46,7 @@ public class ClienteService {
         cliente.setNome(clienteAtualizado.getNome());
         cliente.setTelefone(clienteAtualizado.getTelefone());
         cliente.setEmail(clienteAtualizado.getEmail());
+        cliente.setCpf(clienteAtualizado.getCpf());
 
         return clienteRepository.save(cliente);
     }

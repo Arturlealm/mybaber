@@ -27,4 +27,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
 
     }
+
+    @ExceptionHandler (IllegalArgumentException.class)
+    public ResponseEntity<ErroResposta> tratarArgumentoInvalido(IllegalArgumentException exception){
+
+        ErroResposta erro = new ErroResposta(HttpStatus.CONFLICT.value(), exception.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+    }
 }
