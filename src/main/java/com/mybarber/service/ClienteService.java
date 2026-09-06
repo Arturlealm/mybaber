@@ -1,0 +1,62 @@
+package com.mybarber.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.mybarber.exception.RecursoNaoEncontradoException;
+import com.mybarber.model.Cliente;
+import com.mybarber.repository.ClienteRepository;
+
+@Service 
+public class ClienteService {
+    
+    private final ClienteRepository clienteRepository;
+
+    public ClienteService(ClienteRepository clienteRepository){
+        this.clienteRepository = clienteRepository;
+    }
+
+    public List<Cliente> listarTodos(){
+        return clienteRepository.findAll();
+    }
+
+    public Cliente salvar(Cliente cliente){
+
+        if (clienteRepository.existsByEmail(cliente.getEmail())) {
+            throw new IllegalArgumentException("Email já cadastrado");
+        }
+        if (clienteRepository.existsByCpf(cliente.getCpf())) {
+            throw new IllegalArgumentException("CPF já cadastrado");
+        }
+
+        return clienteRepository.save(cliente);
+    }
+
+    public Cliente buscarPorId(Long id){
+        return clienteRepository.findById(id)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente não encontrado com o id: " + id));
+    }
+
+    public Cliente atualizar(Long id, Cliente clienteAtualizado){
+         
+        Cliente cliente = clienteRepository.findById(id)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente não encontrando com o id: " + id));
+
+        cliente.setNome(clienteAtualizado.getNome());
+        cliente.setTelefone(clienteAtualizado.getTelefone());
+        cliente.setEmail(clienteAtualizado.getEmail());
+        cliente.setCpf(clienteAtualizado.getCpf());
+
+        return clienteRepository.save(cliente);
+    }
+
+    public void deletar(Long id){
+
+        if (!clienteRepository.existsById(id)) {
+            throw new RecursoNaoEncontradoException("Cliente não encontrado com id: " + id);
+        }
+
+        clienteRepository.deleteById(id);
+    }
+}
