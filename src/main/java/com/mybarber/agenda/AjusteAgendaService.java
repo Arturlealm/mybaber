@@ -3,10 +3,14 @@ package com.mybarber.agenda;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.mybarber.agendamento.AgendamentoRepository;
+import com.mybarber.compartilhado.excecao.ConflitoDadosException;
 import com.mybarber.compartilhado.excecao.RecursoNaoEncontradoException;
 import com.mybarber.compartilhado.excecao.RegraNegocioException;
 import com.mybarber.filial.FilialService;
@@ -17,16 +21,19 @@ import com.mybarber.funcionario.FuncionarioService;
 public class AjusteAgendaService {
 
     private final AjusteAgendaRepository ajusteAgendaRepository;
+    private final AgendamentoRepository agendamentoRepository;
     private final FuncionarioService funcionarioService;
     private final FilialService filialService;
     private final Clock relogio;
 
     public AjusteAgendaService(
             AjusteAgendaRepository ajusteAgendaRepository,
+            AgendamentoRepository agendamentoRepository,
             FuncionarioService funcionarioService,
             FilialService filialService,
             Clock relogio) {
         this.ajusteAgendaRepository = ajusteAgendaRepository;
+        this.agendamentoRepository = agendamentoRepository;
         this.funcionarioService = funcionarioService;
         this.filialService = filialService;
         this.relogio = relogio;
@@ -57,6 +64,8 @@ public class AjusteAgendaService {
             ajuste.setFilialId(idFilial);
         }
 
+        validarAgendamentosAfetados(ajuste.getFilialId(), ajuste.getFuncionarioId(), requisicao);
+
         ajuste.setData(requisicao.data());
         ajuste.setTipo(requisicao.tipo());
         ajuste.setHoraInicio(requisicao.tipo() == TipoAjusteAgenda.ABERTO ? requisicao.horaInicio() : null);
@@ -75,6 +84,32 @@ public class AjusteAgendaService {
             throw new RegraNegocioException("Não é possível remover ajustes de datas passadas");
         }
         ajusteAgendaRepository.delete(ajuste);
+    }
+
+    private void validarAgendamentosAfetados(Long filialId, Long funcionarioId, AjusteAgendaRequest requisicao) {
+        LocalDate data = requisicao.data();
+        Set<Long> funcionariosComAjusteProprio = funcionarioId != null
+                ? Set.of()
+                : ajusteAgendaRepository.findAllByFilialIdAndDataBetweenOrderByDataAsc(filialId, data, data).stream()
+                        .filter(ajuste -> !ajuste.isGeral())
+                        .map(AjusteAgenda::getFuncionarioId)
+                        .collect(Collectors.toSet());
+
+        long quantidadeAfetados = agendamentoRepository
+                .buscarAgendadosDaFilialNoPeriodo(filialId, data.atStartOfDay(), data.plusDays(1).atStartOfDay())
+                .stream()
+                .filter(agendamento -> funcionarioId == null
+                        ? !funcionariosComAjusteProprio.contains(agendamento.getFuncionario().getId())
+                        : funcionarioId.equals(agendamento.getFuncionario().getId()))
+                .filter(agendamento -> requisicao.tipo() == TipoAjusteAgenda.FECHADO
+                        || agendamento.getInicio().toLocalTime().isBefore(requisicao.horaInicio())
+                        || agendamento.getFim().toLocalTime().isAfter(requisicao.horaFim()))
+                .count();
+
+        if (quantidadeAfetados > 0) {
+            throw new ConflitoDadosException("Existem " + quantidadeAfetados
+                    + " agendamento(s) ativo(s) fora do novo horário nesse dia. Cancele ou reagende antes de ajustar a agenda");
+        }
     }
 
     private void validar(AjusteAgendaRequest requisicao) {
