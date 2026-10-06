@@ -1,12 +1,11 @@
-package com.mybarber.service;
+package com.mybarber.cliente;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.mybarber.exception.RecursoNaoEncontradoException;
-import com.mybarber.model.Cliente;
-import com.mybarber.repository.ClienteRepository;
+import com.mybarber.compartilhado.excecao.ConflitoDadosException;
+import com.mybarber.compartilhado.excecao.RecursoNaoEncontradoException;
 
 @Service 
 public class ClienteService {
@@ -24,10 +23,10 @@ public class ClienteService {
     public Cliente salvar(Cliente cliente){
 
         if (clienteRepository.existsByEmail(cliente.getEmail())) {
-            throw new IllegalArgumentException("Email já cadastrado");
+            throw new ConflitoDadosException("Email já cadastrado");
         }
         if (clienteRepository.existsByCpf(cliente.getCpf())) {
-            throw new IllegalArgumentException("CPF já cadastrado");
+            throw new ConflitoDadosException("CPF já cadastrado");
         }
 
         return clienteRepository.save(cliente);

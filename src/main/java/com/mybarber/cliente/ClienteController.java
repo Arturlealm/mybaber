@@ -1,4 +1,4 @@
-package com.mybarber.controller;
+package com.mybarber.cliente;
 
 import java.util.List;
 
@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mybarber.model.Cliente;
-import com.mybarber.service.ClienteService;
 
 import jakarta.validation.Valid;
 

@@ -1,4 +1,4 @@
-package com.mybarber.model;
+package com.mybarber.cliente;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
