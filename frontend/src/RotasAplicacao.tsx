@@ -5,6 +5,9 @@ import { RotaProtegida } from './autenticacao/RotaProtegida'
 import { LayoutAplicacao } from './componentes/LayoutAplicacao'
 import { PaginaMeusAgendamentos } from './paginas/cliente/PaginaMeusAgendamentos'
 import { PaginaCalendarioAgenda } from './paginas/administracao/PaginaCalendarioAgenda'
+import { PaginaFuncionarios } from './paginas/administracao/PaginaFuncionarios'
+import { PaginaRelatorios } from './paginas/administracao/PaginaRelatorios'
+import { PaginaServicos } from './paginas/administracao/PaginaServicos'
 import { PaginaNovoAgendamento } from './paginas/cliente/PaginaNovoAgendamento'
 import { PaginaAgendaDoDia } from './paginas/funcionario/PaginaAgendaDoDia'
 import { PaginaCadastroCliente } from './paginas/PaginaCadastroCliente'
@@ -33,6 +36,9 @@ export function RotasAplicacao() {
 
         <Route element={<RotaProtegida perfisPermitidos={['ADMINISTRADOR']} />}>
           <Route path="/administracao/calendario" element={<PaginaCalendarioAgenda />} />
+          <Route path="/administracao/servicos" element={<PaginaServicos />} />
+          <Route path="/administracao/funcionarios" element={<PaginaFuncionarios />} />
+          <Route path="/administracao/relatorios" element={<PaginaRelatorios />} />
         </Route>
 
         <Route path="*" element={<RedirecionamentoInicial />} />
