@@ -1,0 +1,9 @@
+--liquibase formatted sql
+
+--changeset arturlealm:002-ajustar-tabela-clientes
+ALTER TABLE clientes ALTER COLUMN cpf DROP NOT NULL;
+ALTER TABLE clientes ALTER COLUMN cpf TYPE VARCHAR(11);
+ALTER TABLE clientes ALTER COLUMN telefone TYPE VARCHAR(11);
+ALTER TABLE clientes ADD COLUMN ativo BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE clientes ADD COLUMN criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW();
+ALTER TABLE clientes ADD COLUMN atualizado_em TIMESTAMPTZ NOT NULL DEFAULT NOW();

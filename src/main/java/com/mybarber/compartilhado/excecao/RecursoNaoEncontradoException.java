@@ -1,4 +1,4 @@
-package com.mybarber.exception;
+package com.mybarber.compartilhado.excecao;
 
 public class RecursoNaoEncontradoException extends RuntimeException {
 
