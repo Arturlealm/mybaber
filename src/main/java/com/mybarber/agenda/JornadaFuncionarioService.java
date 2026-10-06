@@ -1,27 +1,30 @@
 package com.mybarber.agenda;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.mybarber.compartilhado.excecao.RegraNegocioException;
+import com.mybarber.filial.FilialService;
 import com.mybarber.funcionario.FuncionarioService;
 
 @Service
 public class JornadaFuncionarioService {
 
     private final JornadaFuncionarioRepository jornadaFuncionarioRepository;
+    private final JornadaFilialRepository jornadaFilialRepository;
     private final FuncionarioService funcionarioService;
+    private final FilialService filialService;
 
     public JornadaFuncionarioService(
             JornadaFuncionarioRepository jornadaFuncionarioRepository,
-            FuncionarioService funcionarioService) {
+            JornadaFilialRepository jornadaFilialRepository,
+            FuncionarioService funcionarioService,
+            FilialService filialService) {
         this.jornadaFuncionarioRepository = jornadaFuncionarioRepository;
+        this.jornadaFilialRepository = jornadaFilialRepository;
         this.funcionarioService = funcionarioService;
+        this.filialService = filialService;
     }
 
     @Transactional(readOnly = true)
@@ -30,10 +33,11 @@ public class JornadaFuncionarioService {
         return jornadaFuncionarioRepository.findAllByFuncionarioId(funcionarioId);
     }
 
+    /* Lista vazia remove a jornada própria e o barbeiro volta a seguir a jornada padrão da filial */
     @Transactional
-    public List<JornadaFuncionario> definirJornada(Long funcionarioId, JornadaFuncionarioRequest requisicao) {
+    public List<JornadaFuncionario> definirJornada(Long funcionarioId, JornadaSemanalRequest requisicao) {
         funcionarioService.buscarBarbeiroAtivoPorId(funcionarioId);
-        validarIntervalos(requisicao.intervalos());
+        ValidadorIntervalosJornada.validar(requisicao.intervalos());
 
         jornadaFuncionarioRepository.excluirTodasDoFuncionario(funcionarioId);
         List<JornadaFuncionario> jornadas = requisicao.intervalos().stream()
@@ -43,26 +47,22 @@ public class JornadaFuncionarioService {
         return jornadaFuncionarioRepository.saveAll(jornadas);
     }
 
-    private void validarIntervalos(List<JornadaFuncionarioIntervaloRequest> intervalos) {
-        for (JornadaFuncionarioIntervaloRequest intervalo : intervalos) {
-            if (!intervalo.horaFim().isAfter(intervalo.horaInicio())) {
-                throw new RegraNegocioException("A hora de fim deve ser posterior à hora de início em "
-                        + intervalo.diaSemana());
-            }
-        }
+    @Transactional(readOnly = true)
+    public List<JornadaFilial> buscarJornadaDaFilial(Long filialId) {
+        filialService.buscarAtivaPorId(filialId);
+        return jornadaFilialRepository.findAllByFilialId(filialId);
+    }
 
-        Map<DiaSemana, List<JornadaFuncionarioIntervaloRequest>> intervalosPorDia = intervalos.stream()
-                .collect(Collectors.groupingBy(JornadaFuncionarioIntervaloRequest::diaSemana));
+    @Transactional
+    public List<JornadaFilial> definirJornadaDaFilial(Long filialId, JornadaSemanalRequest requisicao) {
+        filialService.buscarAtivaPorId(filialId);
+        ValidadorIntervalosJornada.validar(requisicao.intervalos());
 
-        intervalosPorDia.forEach((dia, intervalosDoDia) -> {
-            List<JornadaFuncionarioIntervaloRequest> ordenados = intervalosDoDia.stream()
-                    .sorted(Comparator.comparing(JornadaFuncionarioIntervaloRequest::horaInicio))
-                    .toList();
-            for (int i = 1; i < ordenados.size(); i++) {
-                if (ordenados.get(i).horaInicio().isBefore(ordenados.get(i - 1).horaFim())) {
-                    throw new RegraNegocioException("Existem intervalos sobrepostos em " + dia);
-                }
-            }
-        });
+        jornadaFilialRepository.excluirTodasDaFilial(filialId);
+        List<JornadaFilial> jornadas = requisicao.intervalos().stream()
+                .map(intervalo -> new JornadaFilial(
+                        filialId, intervalo.diaSemana(), intervalo.horaInicio(), intervalo.horaFim()))
+                .toList();
+        return jornadaFilialRepository.saveAll(jornadas);
     }
 }

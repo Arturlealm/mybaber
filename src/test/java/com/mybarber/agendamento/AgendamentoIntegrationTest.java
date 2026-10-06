@@ -8,8 +8,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -115,6 +117,29 @@ class AgendamentoIntegrationTest {
                         .param("data", amanha.toString())
                         .param("servicoIds", idCabelo.toString()))
                 .andExpect(jsonPath("$.horarios[0]").value("09:00:00"))
+                .andExpect(jsonPath("$.horarios.length()").value(6));
+    }
+
+    @Test
+    void barbeiroSemJornadaPropriaDeveSeguirAJornadaPadraoDaFilial() throws Exception {
+        LocalDate domingo = LocalDate.now(ZoneId.of("America/Sao_Paulo")).plusDays(2)
+                .with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        String tokenAdministrador = autenticar("/api/autenticacao/funcionarios/login", "admin@teste.com", "senhaAdmin123");
+
+        String barbeiro = executar(post("/api/funcionarios"), tokenAdministrador, """
+                {"nome": "Paulo", "email": "paulo@teste.com", "telefone": "11977776666",
+                 "senha": "senhaBarbeiro123", "tipo": "BARBEIRO", "realizaAtendimentos": true}
+                """, 201);
+        Integer idBarbeiro = JsonPath.read(barbeiro, "$.id");
+
+        mockMvc.perform(get("/api/agendamentos/horarios-disponiveis")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenAdministrador)
+                        .param("funcionarioId", idBarbeiro.toString())
+                        .param("data", domingo.toString())
+                        .param("servicoIds", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.horarios[0]").value("09:00:00"))
+                .andExpect(jsonPath("$.horarios[5]").value("11:30:00"))
                 .andExpect(jsonPath("$.horarios.length()").value(6));
     }
 
