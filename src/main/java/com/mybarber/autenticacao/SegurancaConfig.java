@@ -58,6 +58,7 @@ public class SegurancaConfig {
                 .sessionManagement(sessao -> sessao.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(autorizacao -> autorizacao
                         .requestMatchers(HttpMethod.POST, "/api/clientes", "/api/autenticacao/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/servicos", "/api/servicos/combinacoes").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(servidorRecursos -> servidorRecursos
