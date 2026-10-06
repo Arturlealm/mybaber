@@ -10,9 +10,10 @@ public record ExpedienteDia(
         String motivo,
         List<IntervaloHorario> intervalos) {
 
-    /* Prioridade: ajuste do funcionário, depois ajuste geral da filial, depois a jornada semanal */
+    /* Prioridade: ajuste do funcionário, depois ajuste geral da filial, depois a jornada (do funcionário ou da filial) */
     public static ExpedienteDia calcular(
-            List<JornadaFuncionario> jornadasDoDia,
+            List<IntervaloHorario> jornadaDoDia,
+            OrigemExpediente origemJornada,
             AjusteAgenda ajusteFuncionario,
             AjusteAgenda ajusteGeral) {
         if (ajusteFuncionario != null) {
@@ -21,15 +22,14 @@ public record ExpedienteDia(
         if (ajusteGeral != null) {
             return deAjuste(ajusteGeral, OrigemExpediente.AJUSTE_GERAL);
         }
-        if (jornadasDoDia.isEmpty()) {
-            return new ExpedienteDia(SituacaoExpediente.FECHADO, OrigemExpediente.JORNADA, null, null, List.of());
+        if (jornadaDoDia.isEmpty()) {
+            return new ExpedienteDia(SituacaoExpediente.FECHADO, origemJornada, null, null, List.of());
         }
 
-        List<IntervaloHorario> intervalos = jornadasDoDia.stream()
-                .sorted(Comparator.comparing(JornadaFuncionario::getHoraInicio))
-                .map(jornada -> new IntervaloHorario(jornada.getHoraInicio(), jornada.getHoraFim()))
+        List<IntervaloHorario> intervalos = jornadaDoDia.stream()
+                .sorted(Comparator.comparing(IntervaloHorario::inicio))
                 .toList();
-        return new ExpedienteDia(SituacaoExpediente.ABERTO, OrigemExpediente.JORNADA, null, null, intervalos);
+        return new ExpedienteDia(SituacaoExpediente.ABERTO, origemJornada, null, null, intervalos);
     }
 
     private static ExpedienteDia deAjuste(AjusteAgenda ajuste, OrigemExpediente origem) {

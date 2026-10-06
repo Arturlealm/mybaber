@@ -61,9 +61,24 @@ public class AgendaController {
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public JornadaFuncionarioResponse definirJornada(
             @PathVariable Long funcionarioId,
-            @Valid @RequestBody JornadaFuncionarioRequest requisicao) {
+            @Valid @RequestBody JornadaSemanalRequest requisicao) {
         return JornadaFuncionarioResponse.de(
                 funcionarioId, jornadaFuncionarioService.definirJornada(funcionarioId, requisicao));
+    }
+
+    @GetMapping("/jornadas/filiais/{filialId}")
+    @PreAuthorize("hasAnyRole('BARBEIRO', 'ADMINISTRADOR')")
+    public JornadaFilialResponse buscarJornadaDaFilial(@PathVariable Long filialId) {
+        return JornadaFilialResponse.de(filialId, jornadaFuncionarioService.buscarJornadaDaFilial(filialId));
+    }
+
+    @PutMapping("/jornadas/filiais/{filialId}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public JornadaFilialResponse definirJornadaDaFilial(
+            @PathVariable Long filialId,
+            @Valid @RequestBody JornadaSemanalRequest requisicao) {
+        return JornadaFilialResponse.de(
+                filialId, jornadaFuncionarioService.definirJornadaDaFilial(filialId, requisicao));
     }
 
     @GetMapping("/ajustes")

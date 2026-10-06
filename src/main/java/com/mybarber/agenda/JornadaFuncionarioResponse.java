@@ -4,7 +4,7 @@ import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 
-public record JornadaFuncionarioResponse(Long funcionarioId, List<Intervalo> intervalos) {
+public record JornadaFuncionarioResponse(Long funcionarioId, boolean segueJornadaDaFilial, List<Intervalo> intervalos) {
 
     public record Intervalo(DiaSemana diaSemana, LocalTime horaInicio, LocalTime horaFim) {
     }
@@ -15,6 +15,6 @@ public record JornadaFuncionarioResponse(Long funcionarioId, List<Intervalo> int
                         .thenComparing(JornadaFuncionario::getHoraInicio))
                 .map(jornada -> new Intervalo(jornada.getDiaSemana(), jornada.getHoraInicio(), jornada.getHoraFim()))
                 .toList();
-        return new JornadaFuncionarioResponse(funcionarioId, intervalos);
+        return new JornadaFuncionarioResponse(funcionarioId, intervalos.isEmpty(), intervalos);
     }
 }

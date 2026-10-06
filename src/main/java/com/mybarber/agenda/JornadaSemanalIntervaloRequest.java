@@ -4,7 +4,7 @@ import java.time.LocalTime;
 
 import jakarta.validation.constraints.NotNull;
 
-public record JornadaFuncionarioIntervaloRequest(
+public record JornadaSemanalIntervaloRequest(
         @NotNull(message = "O dia da semana é obrigatório")
         DiaSemana diaSemana,
 
