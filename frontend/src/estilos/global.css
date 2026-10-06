@@ -119,6 +119,8 @@ a {
 
 .menu-item {
   color: #cfc6b8;
+  white-space: nowrap;
+  flex-shrink: 0;
   text-decoration: none;
   padding: 0.4rem 0.75rem;
   border-radius: 999px;
@@ -605,8 +607,14 @@ th.numero {
     display: none;
   }
 
-  .dia-calendario .ponto {
-    display: inline-block;
+  .dia-resumo.alerta,
+  .dia-resumo.especial {
+    display: block;
+    font-size: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
   }
 }
 
@@ -620,5 +628,26 @@ th.numero {
 @media (max-width: 900px) {
   .layout-calendario {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .cabecalho-conteudo {
+    gap: 0.5rem 1rem;
+  }
+
+  .menu {
+    order: 3;
+    flex-basis: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .usuario {
+    margin-left: auto;
+  }
+
+  .usuario small {
+    display: none;
   }
 }

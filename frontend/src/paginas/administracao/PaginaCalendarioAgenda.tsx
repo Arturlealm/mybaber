@@ -63,7 +63,7 @@ export function PaginaCalendarioAgenda() {
           <button type="button" className="botao botao-secundario" onClick={() => mudarMes(-1)}>
             ‹
           </button>
-          <strong style={{ textTransform: 'capitalize', minWidth: 150, textAlign: 'center' }}>
+          <strong style={{ minWidth: 150, textAlign: 'center' }}>
             {formatarMesAno(mesExibido)}
           </strong>
           <button type="button" className="botao botao-secundario" onClick={() => mudarMes(1)}>

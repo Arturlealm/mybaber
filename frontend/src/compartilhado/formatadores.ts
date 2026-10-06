@@ -25,8 +25,12 @@ export function formatarDataCurta(dataIso: string) {
   return formatoDataCurta.format(converterDataIso(dataIso))
 }
 
+export function capitalizar(texto: string) {
+  return texto.charAt(0).toUpperCase() + texto.slice(1)
+}
+
 export function formatarMesAno(data: Date) {
-  return formatoMesAno.format(data)
+  return capitalizar(formatoMesAno.format(data))
 }
 
 export function formatarDataIso(data: Date) {

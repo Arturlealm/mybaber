@@ -5,6 +5,7 @@ import type { Agendamento, BarbeiroResumo } from '../../api/tiposApi'
 import { useAutenticacao } from '../../autenticacao/ContextoAutenticacao'
 import { AvisoErro, AvisoSucesso } from '../../componentes/AvisosOperacao'
 import {
+  capitalizar,
   formatarDataLonga,
   formatarHora,
   formatarMoeda,
@@ -70,7 +71,7 @@ export function PaginaAgendaDoDia() {
       <div className="titulo-pagina">
         <div>
           <h1>Agenda do dia</h1>
-          <p style={{ textTransform: 'capitalize' }}>{formatarDataLonga(data)}</p>
+          <p>{capitalizar(formatarDataLonga(data))}</p>
         </div>
         <div className="linha">
           <button type="button" className="botao botao-secundario" onClick={() => setData(somarDias(data, -1))}>

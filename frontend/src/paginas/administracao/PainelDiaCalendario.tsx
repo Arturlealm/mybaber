@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { descreverErro, requisitarApi } from '../../api/clienteHttp'
 import type { CalendarioAgendaDia, TipoAjusteAgenda } from '../../api/tiposApi'
 import { AvisoErro } from '../../componentes/AvisosOperacao'
-import { formatarDataLonga, formatarHora } from '../../compartilhado/formatadores'
+import { capitalizar, formatarDataLonga, formatarHora } from '../../compartilhado/formatadores'
 import { NOME_ORIGEM_EXPEDIENTE } from '../../compartilhado/nomesExibicao'
 
 type Propriedades = {
@@ -76,7 +76,7 @@ export function PainelDiaCalendario({ dia, diaPassado, aoAlterar }: Propriedades
   return (
     <section className="cartao pilha">
       <div>
-        <h2 style={{ textTransform: 'capitalize' }}>{formatarDataLonga(dia.data)}</h2>
+        <h2>{capitalizar(formatarDataLonga(dia.data))}</h2>
         {diaPassado && <p className="texto-suave">Datas passadas não podem ser alteradas.</p>}
       </div>
 
