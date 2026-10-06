@@ -21,4 +21,9 @@ public class AutenticacaoController {
     public TokenAcessoResponse autenticarCliente(@Valid @RequestBody LoginRequest requisicao) {
         return autenticacaoService.autenticarCliente(requisicao);
     }
+
+    @PostMapping("/funcionarios/login")
+    public TokenAcessoResponse autenticarFuncionario(@Valid @RequestBody LoginRequest requisicao) {
+        return autenticacaoService.autenticarFuncionario(requisicao);
+    }
 }
