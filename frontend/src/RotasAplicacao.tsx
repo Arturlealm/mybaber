@@ -1,0 +1,48 @@
+import { Navigate, Route, Routes } from 'react-router-dom'
+
+import { rotaInicialDoPerfil, useAutenticacao } from './autenticacao/ContextoAutenticacao'
+import { RotaProtegida } from './autenticacao/RotaProtegida'
+import { LayoutAplicacao } from './componentes/LayoutAplicacao'
+import { PaginaMeusAgendamentos } from './paginas/cliente/PaginaMeusAgendamentos'
+import { PaginaCalendarioAgenda } from './paginas/administracao/PaginaCalendarioAgenda'
+import { PaginaFuncionarios } from './paginas/administracao/PaginaFuncionarios'
+import { PaginaRelatorios } from './paginas/administracao/PaginaRelatorios'
+import { PaginaServicos } from './paginas/administracao/PaginaServicos'
+import { PaginaNovoAgendamento } from './paginas/cliente/PaginaNovoAgendamento'
+import { PaginaAgendaDoDia } from './paginas/funcionario/PaginaAgendaDoDia'
+import { PaginaCadastroCliente } from './paginas/PaginaCadastroCliente'
+import { PaginaEntrar } from './paginas/PaginaEntrar'
+
+function RedirecionamentoInicial() {
+  const { sessao } = useAutenticacao()
+  return <Navigate to={sessao ? rotaInicialDoPerfil(sessao.perfil) : '/entrar'} replace />
+}
+
+export function RotasAplicacao() {
+  return (
+    <Routes>
+      <Route element={<LayoutAplicacao />}>
+        <Route path="/entrar" element={<PaginaEntrar />} />
+        <Route path="/cadastro" element={<PaginaCadastroCliente />} />
+
+        <Route element={<RotaProtegida perfisPermitidos={['CLIENTE']} />}>
+          <Route path="/agendar" element={<PaginaNovoAgendamento />} />
+          <Route path="/meus-agendamentos" element={<PaginaMeusAgendamentos />} />
+        </Route>
+
+        <Route element={<RotaProtegida perfisPermitidos={['BARBEIRO', 'ADMINISTRADOR']} />}>
+          <Route path="/agenda-do-dia" element={<PaginaAgendaDoDia />} />
+        </Route>
+
+        <Route element={<RotaProtegida perfisPermitidos={['ADMINISTRADOR']} />}>
+          <Route path="/administracao/calendario" element={<PaginaCalendarioAgenda />} />
+          <Route path="/administracao/servicos" element={<PaginaServicos />} />
+          <Route path="/administracao/funcionarios" element={<PaginaFuncionarios />} />
+          <Route path="/administracao/relatorios" element={<PaginaRelatorios />} />
+        </Route>
+
+        <Route path="*" element={<RedirecionamentoInicial />} />
+      </Route>
+    </Routes>
+  )
+}

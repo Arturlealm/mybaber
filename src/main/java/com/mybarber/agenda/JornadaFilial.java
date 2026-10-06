@@ -12,15 +12,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "jornadas_funcionarios")
-public class JornadaFuncionario {
+@Table(name = "jornadas_filiais")
+public class JornadaFilial {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "funcionario_id", nullable = false)
-    private Long funcionarioId;
+    @Column(name = "filial_id", nullable = false)
+    private Long filialId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "dia_semana", nullable = false, length = 10)
@@ -32,11 +32,11 @@ public class JornadaFuncionario {
     @Column(name = "hora_fim", nullable = false)
     private LocalTime horaFim;
 
-    protected JornadaFuncionario() {
+    protected JornadaFilial() {
     }
 
-    public JornadaFuncionario(Long funcionarioId, DiaSemana diaSemana, LocalTime horaInicio, LocalTime horaFim) {
-        this.funcionarioId = funcionarioId;
+    public JornadaFilial(Long filialId, DiaSemana diaSemana, LocalTime horaInicio, LocalTime horaFim) {
+        this.filialId = filialId;
         this.diaSemana = diaSemana;
         this.horaInicio = horaInicio;
         this.horaFim = horaFim;
@@ -50,8 +50,8 @@ public class JornadaFuncionario {
         return id;
     }
 
-    public Long getFuncionarioId() {
-        return funcionarioId;
+    public Long getFilialId() {
+        return filialId;
     }
 
     public DiaSemana getDiaSemana() {

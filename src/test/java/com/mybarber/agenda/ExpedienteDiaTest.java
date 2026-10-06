@@ -12,16 +12,16 @@ class ExpedienteDiaTest {
 
     private static final LocalDate FERIADO = LocalDate.of(2026, 11, 20);
 
-    private final List<JornadaFuncionario> jornadaSexta = List.of(
-            new JornadaFuncionario(1L, DiaSemana.SEXTA, LocalTime.of(13, 0), LocalTime.of(18, 0)),
-            new JornadaFuncionario(1L, DiaSemana.SEXTA, LocalTime.of(8, 0), LocalTime.of(12, 0)));
+    private final List<IntervaloHorario> jornadaSexta = List.of(
+            new IntervaloHorario(LocalTime.of(13, 0), LocalTime.of(18, 0)),
+            new IntervaloHorario(LocalTime.of(8, 0), LocalTime.of(12, 0)));
 
     @Test
-    void deveUsarJornadaSemanalQuandoNaoHaAjustes() {
-        ExpedienteDia expediente = ExpedienteDia.calcular(jornadaSexta, null, null);
+    void deveUsarJornadaQuandoNaoHaAjustes() {
+        ExpedienteDia expediente = ExpedienteDia.calcular(jornadaSexta, OrigemExpediente.JORNADA_FILIAL, null, null);
 
         assertThat(expediente.situacao()).isEqualTo(SituacaoExpediente.ABERTO);
-        assertThat(expediente.origem()).isEqualTo(OrigemExpediente.JORNADA);
+        assertThat(expediente.origem()).isEqualTo(OrigemExpediente.JORNADA_FILIAL);
         assertThat(expediente.intervalos()).containsExactly(
                 new IntervaloHorario(LocalTime.of(8, 0), LocalTime.of(12, 0)),
                 new IntervaloHorario(LocalTime.of(13, 0), LocalTime.of(18, 0)));
@@ -29,14 +29,15 @@ class ExpedienteDiaTest {
 
     @Test
     void deveFicarFechadoQuandoNaoHaJornadaNoDia() {
-        ExpedienteDia expediente = ExpedienteDia.calcular(List.of(), null, null);
+        ExpedienteDia expediente = ExpedienteDia.calcular(List.of(), OrigemExpediente.JORNADA_FUNCIONARIO, null, null);
 
         assertThat(expediente.situacao()).isEqualTo(SituacaoExpediente.FECHADO);
     }
 
     @Test
     void feriadoFechadoParaTodosDeveFecharAAgendaDoBarbeiro() {
-        ExpedienteDia expediente = ExpedienteDia.calcular(jornadaSexta, null, ajusteGeralFechado());
+        ExpedienteDia expediente = ExpedienteDia.calcular(
+                jornadaSexta, OrigemExpediente.JORNADA_FILIAL, null, ajusteGeralFechado());
 
         assertThat(expediente.situacao()).isEqualTo(SituacaoExpediente.FECHADO);
         assertThat(expediente.origem()).isEqualTo(OrigemExpediente.AJUSTE_GERAL);
@@ -52,7 +53,8 @@ class ExpedienteDiaTest {
         abertoParaBarbeiro.setHoraInicio(LocalTime.of(9, 0));
         abertoParaBarbeiro.setHoraFim(LocalTime.of(13, 0));
 
-        ExpedienteDia expediente = ExpedienteDia.calcular(jornadaSexta, abertoParaBarbeiro, ajusteGeralFechado());
+        ExpedienteDia expediente = ExpedienteDia.calcular(
+                jornadaSexta, OrigemExpediente.JORNADA_FILIAL, abertoParaBarbeiro, ajusteGeralFechado());
 
         assertThat(expediente.situacao()).isEqualTo(SituacaoExpediente.ABERTO);
         assertThat(expediente.origem()).isEqualTo(OrigemExpediente.AJUSTE_FUNCIONARIO);

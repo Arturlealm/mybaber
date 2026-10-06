@@ -9,6 +9,15 @@ Sistema web de agendamento para barbearias.
 - Liquibase para versionamento do banco
 - Spring Security com JWT
 - Testcontainers para testes de integração
+- Frontend em React 19 + TypeScript + Vite (pasta `frontend`)
+
+## Estrutura
+
+```
+mybarber/
+├── src/        API (Spring Boot)
+└── frontend/   Aplicação web (React)
+```
 
 ## Como executar
 
@@ -19,13 +28,31 @@ Sistema web de agendamento para barbearias.
    docker compose up -d
    ```
 
-3. Inicie a aplicação:
+3. Inicie a API (porta 8080):
 
    ```bash
    ./mvnw spring-boot:run
    ```
 
+4. Em outro terminal, inicie o frontend (porta 5173):
+
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+5. Acesse http://localhost:5173. Clientes criam a conta na tela de cadastro; o administrador entra em "Sou da equipe" com o email e a senha definidos em `ADMIN_EMAIL` e `ADMIN_SENHA`.
+
 Na primeira execução, o Liquibase cria as tabelas e o sistema cadastra o administrador inicial com os dados das variáveis `ADMIN_*`.
+
+## Telas
+
+| Perfil | Telas |
+|---|---|
+| Cliente | Agendar (serviço, barbeiro, dia e horário) e Meus agendamentos |
+| Barbeiro | Agenda do dia (concluir atendimento confirmando o valor ou informando desconto) |
+| Administrador | Calendário (fechar/abrir dias para todos ou por barbeiro e horário padrão), Agenda do dia, Serviços, Funcionários e Relatórios |
 
 ## Variáveis de ambiente
 
