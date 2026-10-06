@@ -84,6 +84,10 @@ export function PaginaEntrar() {
           </button>
         </form>
 
+        <p className="texto-suave" style={{ margin: 0 }}>
+          <Link to={`/esqueci-senha?tipo=${tipoAcesso === 'clientes' ? 'cliente' : 'equipe'}`}>Esqueci minha senha</Link>
+        </p>
+
         {tipoAcesso === 'clientes' && (
           <p className="texto-suave">
             Ainda não tem cadastro? <Link to="/cadastro">Crie sua conta</Link>
