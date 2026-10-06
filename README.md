@@ -68,6 +68,7 @@ Na primeira execução, o Liquibase cria as tabelas e o sistema cadastra o admin
 | `EMAIL_HABILITADO`, `EMAIL_REMETENTE`, `EMAIL_NOME_REMETENTE` | Envio de emails (desligado por padrão) |
 | `SMTP_HOST`, `SMTP_PORTA`, `SMTP_USUARIO`, `SMTP_SENHA` | Servidor SMTP (Gmail por padrão) |
 | `FRONTEND_URL` | Endereço do frontend usado nos links enviados por email |
+| `LEMBRETE_HABILITADO`, `LEMBRETE_ANTECEDENCIA`, `LEMBRETE_LIMITE_DIARIO` | Lembretes de agendamento por email |
 
 ## Testes
 
@@ -186,7 +187,16 @@ Para enviar pelo Gmail:
    FRONTEND_URL=http://localhost:5173
    ```
 
-O Gmail permite cerca de 500 envios por dia, suficiente para redefinições de senha. O link vale por 30 minutos e só pode ser usado uma vez.
+O Gmail permite cerca de 500 envios por dia. O link de redefinição vale por 30 minutos e só pode ser usado uma vez.
+
+### Lembretes de agendamento
+
+- Enviados 24h antes do horário (`LEMBRETE_ANTECEDENCIA`), verificando a cada 10 minutos.
+- Agendamentos feitos com menos de 3h de antecedência não recebem lembrete.
+- Limite diário de 300 lembretes (`LEMBRETE_LIMITE_DIARIO`), deixando margem para os emails de redefinição de senha dentro da cota do Gmail. O que passar do limite é enviado quando houver saldo, se ainda estiver dentro da janela.
+- Para desligar: `LEMBRETE_HABILITADO=false`.
+
+Para trocar o Gmail por outro serviço (Brevo, Amazon SES, Resend), basta alterar as variáveis `SMTP_*`: todos oferecem SMTP.
 
 ## Segurança
 
