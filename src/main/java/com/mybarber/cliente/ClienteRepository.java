@@ -21,4 +21,6 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     Page<Cliente> findAllByAtivoTrue(Pageable paginacao);
 
     Page<Cliente> findAllByAtivoTrueAndNomeContainingIgnoreCase(String nome, Pageable paginacao);
+
+    Page<Cliente> findAllByAtivoTrueAndTelefoneContaining(String telefone, Pageable paginacao);
 }

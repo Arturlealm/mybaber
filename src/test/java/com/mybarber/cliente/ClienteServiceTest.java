@@ -15,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.mybarber.compartilhado.excecao.ConflitoDadosException;
@@ -91,6 +93,26 @@ class ClienteServiceTest {
                 "João", "joao@email.com", "52998224725", "11912345678")))
                 .isInstanceOf(ConflitoDadosException.class)
                 .hasMessage("CPF já cadastrado para outro cliente");
+    }
+
+    @Test
+    void deveBuscarPorTelefoneQuandoABuscaContemApenasNumeros() {
+        Pageable paginacao = Pageable.ofSize(20);
+        when(clienteRepository.findAllByAtivoTrueAndTelefoneContaining("912345", paginacao)).thenReturn(Page.empty());
+
+        clienteService.listarAtivos("91234-5", paginacao);
+
+        verify(clienteRepository).findAllByAtivoTrueAndTelefoneContaining("912345", paginacao);
+    }
+
+    @Test
+    void deveBuscarPorNomeQuandoABuscaContemLetras() {
+        Pageable paginacao = Pageable.ofSize(20);
+        when(clienteRepository.findAllByAtivoTrueAndNomeContainingIgnoreCase("João", paginacao)).thenReturn(Page.empty());
+
+        clienteService.listarAtivos(" João ", paginacao);
+
+        verify(clienteRepository).findAllByAtivoTrueAndNomeContainingIgnoreCase("João", paginacao);
     }
 
     @Test

@@ -96,7 +96,7 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
 | GET | `/api/clientes/me` | Cliente |
 | PUT | `/api/clientes/me` | Cliente |
 | PUT | `/api/clientes/me/senha` | Cliente |
-| GET | `/api/clientes?nome=&page=&size=` | Barbeiro e administrador |
+| GET | `/api/clientes?busca=&page=&size=` (nome ou telefone) | Barbeiro e administrador |
 | GET | `/api/clientes/{id}` | Barbeiro e administrador |
 | PUT | `/api/clientes/{id}` | Administrador |
 | DELETE | `/api/clientes/{id}` | Administrador (inativa) |

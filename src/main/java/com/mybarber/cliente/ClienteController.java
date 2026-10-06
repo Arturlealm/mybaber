@@ -69,9 +69,9 @@ public class ClienteController {
     @GetMapping
     @PreAuthorize("hasAnyRole('BARBEIRO', 'ADMINISTRADOR')")
     public PaginaResponse<ClienteResponse> listarAtivos(
-            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String busca,
             @PageableDefault(size = 20, sort = "nome", direction = Sort.Direction.ASC) Pageable paginacao) {
-        return PaginaResponse.de(clienteService.listarAtivos(nome, paginacao), ClienteResponse::de);
+        return PaginaResponse.de(clienteService.listarAtivos(busca, paginacao), ClienteResponse::de);
     }
 
     @GetMapping("/{id}")
