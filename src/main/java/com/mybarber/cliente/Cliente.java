@@ -32,6 +32,9 @@ public class Cliente {
     @Column(nullable = false, length = 11)
     private String telefone;
 
+    @Column(name = "senha_hash", nullable = false, length = 100)
+    private String senhaHash;
+
     @Column(nullable = false)
     private boolean ativo = true;
 
@@ -77,6 +80,14 @@ public class Cliente {
 
     public void setTelefone(String telefone) {
         this.telefone = telefone;
+    }
+
+    public String getSenhaHash() {
+        return senhaHash;
+    }
+
+    public void setSenhaHash(String senhaHash) {
+        this.senhaHash = senhaHash;
     }
 
     public boolean isAtivo() {

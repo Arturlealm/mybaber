@@ -8,11 +8,15 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import com.mybarber.autenticacao.CredenciaisInvalidasException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -32,6 +36,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RegraNegocioException.class)
     public ResponseEntity<ErroResposta> tratarRegraNegocio(RegraNegocioException exception) {
         return responder(HttpStatus.UNPROCESSABLE_CONTENT, exception.getMessage());
+    }
+
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    public ResponseEntity<ErroResposta> tratarCredenciaisInvalidas(CredenciaisInvalidasException exception) {
+        return responder(HttpStatus.UNAUTHORIZED, exception.getMessage());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErroResposta> tratarNaoAutenticado(AuthenticationException exception) {
+        return responder(HttpStatus.UNAUTHORIZED, "Autenticação necessária ou token inválido");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErroResposta> tratarAcessoNegado(AccessDeniedException exception) {
+        return responder(HttpStatus.FORBIDDEN, "Você não tem permissão para acessar este recurso");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
