@@ -1,0 +1,15 @@
+services:
+  mybarber-postgres:
+    image: postgres:17-alpine
+    container_name: mybarber-postgres
+    environment:
+      POSTGRES_DB: mybarber
+      POSTGRES_USER: ${DB_USUARIO:-postgres}
+      POSTGRES_PASSWORD: ${DB_SENHA:?Defina DB_SENHA no arquivo .env}
+    ports:
+      - "5432:5432"
+    volumes:
+      - mybarber-postgres-dados:/var/lib/postgresql/data
+
+volumes:
+  mybarber-postgres-dados:
