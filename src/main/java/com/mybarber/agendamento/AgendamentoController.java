@@ -23,8 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mybarber.autenticacao.UsuarioAutenticado;
 import com.mybarber.compartilhado.paginacao.PaginaResponse;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Agendamentos")
 @RestController
 @RequestMapping("/api/agendamentos")
 public class AgendamentoController {

@@ -59,6 +59,7 @@ public class SegurancaConfig {
                 .authorizeHttpRequests(autorizacao -> autorizacao
                         .requestMatchers(HttpMethod.POST, "/api/clientes", "/api/autenticacao/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/servicos", "/api/servicos/combinacoes").permitAll()
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(servidorRecursos -> servidorRecursos

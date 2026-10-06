@@ -22,8 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mybarber.compartilhado.paginacao.PaginaResponse;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Funcionários")
 @RestController
 @RequestMapping("/api/funcionarios")
 public class FuncionarioController {
