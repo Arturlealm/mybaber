@@ -29,5 +29,7 @@ public record FuncionarioAtualizacaoRequest(
         TipoFuncionario tipo,
 
         @NotNull(message = "Informe se o funcionário realiza atendimentos")
-        Boolean realizaAtendimentos) {
+        Boolean realizaAtendimentos,
+
+        Long filialId) {
 }

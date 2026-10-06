@@ -49,6 +49,9 @@ Os testes de integração usam Testcontainers e só rodam quando o Docker está 
 
 ## API
 
+Com a aplicação rodando, a documentação interativa fica em http://localhost:8080/swagger-ui.html.
+Faça login em **Autenticação**, copie o `tokenAcesso` e clique em **Authorize**.
+
 ### Autenticação
 
 | Método | Rota | Acesso |
@@ -83,6 +86,53 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
 | POST | `/api/funcionarios` | Administrador |
 | PUT | `/api/funcionarios/{id}` | Administrador |
 | DELETE | `/api/funcionarios/{id}` | Administrador (inativa) |
+
+### Filiais
+
+| Método | Rota | Acesso |
+|---|---|---|
+| GET | `/api/filiais` | Autenticado |
+| POST, PUT, DELETE | `/api/filiais` | Administrador |
+
+### Serviços
+
+| Método | Rota | Acesso |
+|---|---|---|
+| GET | `/api/servicos` | Público |
+| GET | `/api/servicos/combinacoes` | Público (opções de um clique: Cabelo, Barba, Cabelo e barba) |
+| POST, PUT, DELETE | `/api/servicos` e `/api/servicos/combinacoes` | Administrador |
+
+### Agenda
+
+| Método | Rota | Acesso |
+|---|---|---|
+| GET | `/api/agenda/calendario?inicio=&fim=&filialId=&funcionarioId=` | Barbeiro e administrador |
+| GET | `/api/agenda/jornadas/funcionarios/{id}` | Administrador ou o próprio barbeiro |
+| PUT | `/api/agenda/jornadas/funcionarios/{id}` | Administrador |
+| GET | `/api/agenda/ajustes?inicio=&fim=` | Barbeiro e administrador |
+| POST | `/api/agenda/ajustes` | Administrador (fechar ou abrir um dia para todos ou para um barbeiro) |
+| DELETE | `/api/agenda/ajustes/{id}` | Administrador |
+
+### Agendamentos
+
+| Método | Rota | Acesso |
+|---|---|---|
+| GET | `/api/agendamentos/horarios-disponiveis?funcionarioId=&data=&servicoIds=` | Autenticado |
+| POST | `/api/agendamentos` | Autenticado (funcionário informa o `clienteId`) |
+| GET | `/api/agendamentos/me` | Cliente (histórico) |
+| GET | `/api/agendamentos/agenda-do-dia?data=` | Barbeiro (própria agenda) e administrador |
+| GET | `/api/agendamentos/{id}` | Envolvidos e administrador |
+| PATCH | `/api/agendamentos/{id}/cancelamento` | Cliente (até 2h antes) e funcionários |
+| PATCH | `/api/agendamentos/{id}/conclusao` | Barbeiro e administrador |
+| PATCH | `/api/agendamentos/{id}/nao-comparecimento` | Barbeiro e administrador |
+
+## Regras de agenda
+
+- Horários oferecidos de 30 em 30 minutos; o agendamento ocupa a duração total dos serviços.
+  Exemplo: cabelo e barba às 08:30 ocupa até 09:30, que passa a ser o próximo horário livre.
+- Prioridade do expediente: ajuste do barbeiro no dia, depois ajuste geral da filial (ex.: feriado), depois a jornada semanal.
+- O banco impede dois agendamentos sobrepostos para o mesmo barbeiro.
+- Na conclusão, o barbeiro confirma o valor de tabela ou informa o valor realmente cobrado (desconto).
 
 ## Padrões do projeto
 

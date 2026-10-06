@@ -12,6 +12,8 @@ public record FuncionarioResponse(
         String telefone,
         TipoFuncionario tipo,
         boolean realizaAtendimentos,
+        Long filialId,
+        String filialNome,
         boolean ativo,
         Instant criadoEm) {
 
@@ -24,6 +26,8 @@ public record FuncionarioResponse(
                 funcionario.getTelefone(),
                 funcionario.getTipo(),
                 funcionario.isRealizaAtendimentos(),
+                funcionario.getFilial().getId(),
+                funcionario.getFilial().getNome(),
                 funcionario.isAtivo(),
                 funcionario.getCriadoEm());
     }

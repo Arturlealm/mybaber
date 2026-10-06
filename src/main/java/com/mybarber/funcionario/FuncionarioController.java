@@ -17,12 +17,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mybarber.compartilhado.paginacao.PaginaResponse;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Funcionários")
 @RestController
 @RequestMapping("/api/funcionarios")
 public class FuncionarioController {
@@ -34,8 +37,8 @@ public class FuncionarioController {
     }
 
     @GetMapping("/barbeiros")
-    public List<BarbeiroResumoResponse> listarBarbeirosDisponiveis() {
-        return funcionarioService.listarBarbeirosDisponiveis().stream()
+    public List<BarbeiroResumoResponse> listarBarbeirosDisponiveis(@RequestParam(required = false) Long filialId) {
+        return funcionarioService.listarBarbeirosDisponiveis(filialId).stream()
                 .map(BarbeiroResumoResponse::de)
                 .toList();
     }

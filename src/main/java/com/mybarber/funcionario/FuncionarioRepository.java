@@ -26,4 +26,6 @@ public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> 
     Page<Funcionario> findAllByAtivoTrue(Pageable paginacao);
 
     List<Funcionario> findAllByAtivoTrueAndRealizaAtendimentosTrueOrderByNomeAsc();
+
+    List<Funcionario> findAllByAtivoTrueAndRealizaAtendimentosTrueAndFilialIdOrderByNomeAsc(Long filialId);
 }
