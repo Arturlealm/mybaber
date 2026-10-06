@@ -4,6 +4,7 @@ import { rotaInicialDoPerfil, useAutenticacao } from './autenticacao/ContextoAut
 import { RotaProtegida } from './autenticacao/RotaProtegida'
 import { LayoutAplicacao } from './componentes/LayoutAplicacao'
 import { PaginaMeusAgendamentos } from './paginas/cliente/PaginaMeusAgendamentos'
+import { PaginaCalendarioAgenda } from './paginas/administracao/PaginaCalendarioAgenda'
 import { PaginaNovoAgendamento } from './paginas/cliente/PaginaNovoAgendamento'
 import { PaginaAgendaDoDia } from './paginas/funcionario/PaginaAgendaDoDia'
 import { PaginaCadastroCliente } from './paginas/PaginaCadastroCliente'
@@ -28,6 +29,10 @@ export function RotasAplicacao() {
 
         <Route element={<RotaProtegida perfisPermitidos={['BARBEIRO', 'ADMINISTRADOR']} />}>
           <Route path="/agenda-do-dia" element={<PaginaAgendaDoDia />} />
+        </Route>
+
+        <Route element={<RotaProtegida perfisPermitidos={['ADMINISTRADOR']} />}>
+          <Route path="/administracao/calendario" element={<PaginaCalendarioAgenda />} />
         </Route>
 
         <Route path="*" element={<RedirecionamentoInicial />} />

@@ -609,3 +609,16 @@ th.numero {
     display: inline-block;
   }
 }
+
+.layout-calendario {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout-calendario {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
