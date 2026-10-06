@@ -32,6 +32,7 @@ import com.mybarber.compartilhado.email.MensagemEmail;
 
 @SpringBootTest(properties = {
         "mybarber.jwt.segredo=segredo-de-teste-com-pelo-menos-32-caracteres",
+        "mybarber.lembrete.atraso-inicial=PT1H",
         "mybarber.redefinicao-senha.intervalo-minimo-entre-solicitacoes=0s"
 })
 @AutoConfigureMockMvc

@@ -31,6 +31,7 @@ import com.jayway.jsonpath.JsonPath;
 
 @SpringBootTest(properties = {
         "mybarber.jwt.segredo=segredo-de-teste-com-pelo-menos-32-caracteres",
+        "mybarber.lembrete.atraso-inicial=PT1H",
         "mybarber.administrador-inicial.email=admin@teste.com",
         "mybarber.administrador-inicial.telefone=11900000000",
         "mybarber.administrador-inicial.senha=senhaAdmin123"
