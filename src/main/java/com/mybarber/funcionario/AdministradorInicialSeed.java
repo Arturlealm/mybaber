@@ -44,7 +44,8 @@ public class AdministradorInicialSeed implements ApplicationRunner {
                 propriedades.telefone(),
                 propriedades.senha(),
                 TipoFuncionario.ADMINISTRADOR,
-                false));
+                false,
+                null));
 
         LOGGER.info("Administrador inicial criado com o email {}", propriedades.email());
     }

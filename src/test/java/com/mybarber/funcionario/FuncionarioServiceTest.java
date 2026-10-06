@@ -14,12 +14,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.mybarber.compartilhado.excecao.RegraNegocioException;
+import com.mybarber.filial.FilialService;
 
 @ExtendWith(MockitoExtension.class)
 class FuncionarioServiceTest {
 
     @Mock
     private FuncionarioRepository funcionarioRepository;
+
+    @Mock
+    private FilialService filialService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -61,7 +65,7 @@ class FuncionarioServiceTest {
         when(funcionarioRepository.countByTipoAndAtivoTrue(TipoFuncionario.ADMINISTRADOR)).thenReturn(1L);
 
         assertThatThrownBy(() -> funcionarioService.atualizar(1L, new FuncionarioAtualizacaoRequest(
-                "Admin", "admin@email.com", null, "11912345678", TipoFuncionario.BARBEIRO, true)))
+                "Admin", "admin@email.com", null, "11912345678", TipoFuncionario.BARBEIRO, true, null)))
                 .isInstanceOf(RegraNegocioException.class);
     }
 

@@ -16,15 +16,21 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mybarber.compartilhado.excecao.ConflitoDadosException;
 import com.mybarber.compartilhado.excecao.RecursoNaoEncontradoException;
 import com.mybarber.compartilhado.excecao.RegraNegocioException;
+import com.mybarber.filial.FilialService;
 
 @Service
 public class FuncionarioService {
 
     private final FuncionarioRepository funcionarioRepository;
+    private final FilialService filialService;
     private final PasswordEncoder passwordEncoder;
 
-    public FuncionarioService(FuncionarioRepository funcionarioRepository, PasswordEncoder passwordEncoder) {
+    public FuncionarioService(
+            FuncionarioRepository funcionarioRepository,
+            FilialService filialService,
+            PasswordEncoder passwordEncoder) {
         this.funcionarioRepository = funcionarioRepository;
+        this.filialService = filialService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -34,8 +40,20 @@ public class FuncionarioService {
     }
 
     @Transactional(readOnly = true)
-    public List<Funcionario> listarBarbeirosDisponiveis() {
-        return funcionarioRepository.findAllByAtivoTrueAndRealizaAtendimentosTrueOrderByNomeAsc();
+    public List<Funcionario> listarBarbeirosDisponiveis(Long filialId) {
+        if (filialId == null) {
+            return funcionarioRepository.findAllByAtivoTrueAndRealizaAtendimentosTrueOrderByNomeAsc();
+        }
+        return funcionarioRepository.findAllByAtivoTrueAndRealizaAtendimentosTrueAndFilialIdOrderByNomeAsc(filialId);
+    }
+
+    @Transactional(readOnly = true)
+    public Funcionario buscarBarbeiroAtivoPorId(Long id) {
+        Funcionario funcionario = buscarAtivoPorId(id);
+        if (!funcionario.isRealizaAtendimentos()) {
+            throw new RegraNegocioException("O funcionário informado não realiza atendimentos");
+        }
+        return funcionario;
     }
 
     @Transactional(readOnly = true)
@@ -73,6 +91,7 @@ public class FuncionarioService {
         funcionario.setSenhaHash(passwordEncoder.encode(requisicao.senha()));
         funcionario.setTipo(requisicao.tipo());
         funcionario.setRealizaAtendimentos(requisicao.realizaAtendimentos());
+        funcionario.setFilial(filialService.buscarAtivaOuPadrao(requisicao.filialId()));
 
         return funcionarioRepository.save(funcionario);
     }
@@ -100,6 +119,9 @@ public class FuncionarioService {
         funcionario.setTelefone(normalizarTelefone(requisicao.telefone()));
         funcionario.setTipo(requisicao.tipo());
         funcionario.setRealizaAtendimentos(requisicao.realizaAtendimentos());
+        if (requisicao.filialId() != null) {
+            funcionario.setFilial(filialService.buscarAtivaPorId(requisicao.filialId()));
+        }
 
         return funcionarioRepository.saveAndFlush(funcionario);
     }

@@ -12,7 +12,11 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
+import com.mybarber.filial.Filial;
 
 @Entity
 @Table(name = "funcionarios")
@@ -43,6 +47,10 @@ public class Funcionario {
 
     @Column(name = "realiza_atendimentos", nullable = false)
     private boolean realizaAtendimentos;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "filial_id", nullable = false)
+    private Filial filial;
 
     @Column(nullable = false)
     private boolean ativo = true;
@@ -113,6 +121,14 @@ public class Funcionario {
 
     public void setRealizaAtendimentos(boolean realizaAtendimentos) {
         this.realizaAtendimentos = realizaAtendimentos;
+    }
+
+    public Filial getFilial() {
+        return filial;
+    }
+
+    public void setFilial(Filial filial) {
+        this.filial = filial;
     }
 
     public boolean isAtivo() {
