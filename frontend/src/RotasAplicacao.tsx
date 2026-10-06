@@ -5,6 +5,7 @@ import { RotaProtegida } from './autenticacao/RotaProtegida'
 import { LayoutAplicacao } from './componentes/LayoutAplicacao'
 import { PaginaMeusAgendamentos } from './paginas/cliente/PaginaMeusAgendamentos'
 import { PaginaNovoAgendamento } from './paginas/cliente/PaginaNovoAgendamento'
+import { PaginaAgendaDoDia } from './paginas/funcionario/PaginaAgendaDoDia'
 import { PaginaCadastroCliente } from './paginas/PaginaCadastroCliente'
 import { PaginaEntrar } from './paginas/PaginaEntrar'
 
@@ -23,6 +24,10 @@ export function RotasAplicacao() {
         <Route element={<RotaProtegida perfisPermitidos={['CLIENTE']} />}>
           <Route path="/agendar" element={<PaginaNovoAgendamento />} />
           <Route path="/meus-agendamentos" element={<PaginaMeusAgendamentos />} />
+        </Route>
+
+        <Route element={<RotaProtegida perfisPermitidos={['BARBEIRO', 'ADMINISTRADOR']} />}>
+          <Route path="/agenda-do-dia" element={<PaginaAgendaDoDia />} />
         </Route>
 
         <Route path="*" element={<RedirecionamentoInicial />} />
