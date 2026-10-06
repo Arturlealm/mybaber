@@ -31,6 +31,7 @@ export function LayoutAplicacao() {
   const navegar = useNavigate()
 
   function encerrarSessao() {
+    if (!window.confirm('Deseja sair?')) return
     sair()
     navegar('/entrar')
   }
