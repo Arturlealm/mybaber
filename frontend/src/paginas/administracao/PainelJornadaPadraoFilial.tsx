@@ -1,20 +1,20 @@
 import { useEffect, useState } from 'react'
 
 import { descreverErro, requisitarApi } from '../../api/clienteHttp'
-import type { DiaSemana } from '../../api/tiposApi'
 import { AvisoErro, AvisoSucesso } from '../../componentes/AvisosOperacao'
-import { formatarHora } from '../../compartilhado/formatadores'
+import {
+  converterIntervalosParaJornada,
+  converterJornadaParaIntervalos,
+  descreverHorarioDia,
+  DIAS_SEMANA,
+  EditorJornadaSemanal,
+  type IntervaloJornada,
+  type JornadaSemanalEditavel,
+} from '../../componentes/EditorJornadaSemanal'
 import { NOME_DIA_SEMANA } from '../../compartilhado/nomesExibicao'
 import { useConsultaApi } from '../../compartilhado/useConsultaApi'
 
-type JornadaFilial = {
-  filialId: number
-  intervalos: { diaSemana: DiaSemana; horaInicio: string; horaFim: string }[]
-}
-
-type HorarioDia = { aberto: boolean; horaInicio: string; horaFim: string }
-
-const DIAS_SEMANA: DiaSemana[] = ['SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO', 'DOMINGO']
+type JornadaFilial = { filialId: number; intervalos: IntervaloJornada[] }
 
 export function PainelJornadaPadraoFilial({ filialId, aoAlterar }: { filialId: number; aoAlterar: () => void }) {
   const jornada = useConsultaApi(
@@ -22,25 +22,13 @@ export function PainelJornadaPadraoFilial({ filialId, aoAlterar }: { filialId: n
     [filialId],
   )
   const [editando, setEditando] = useState(false)
-  const [horarios, setHorarios] = useState<Record<DiaSemana, HorarioDia> | null>(null)
+  const [horarios, setHorarios] = useState<JornadaSemanalEditavel | null>(null)
   const [erro, setErro] = useState<string | null>(null)
   const [sucesso, setSucesso] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!jornada.dados) return
-    const porDia = {} as Record<DiaSemana, HorarioDia>
-    DIAS_SEMANA.forEach((dia) => {
-      const intervalo = jornada.dados!.intervalos.find((item) => item.diaSemana === dia)
-      porDia[dia] = intervalo
-        ? { aberto: true, horaInicio: formatarHora(intervalo.horaInicio), horaFim: formatarHora(intervalo.horaFim) }
-        : { aberto: false, horaInicio: '09:00', horaFim: '18:00' }
-    })
-    setHorarios(porDia)
+    if (jornada.dados) setHorarios(converterIntervalosParaJornada(jornada.dados.intervalos))
   }, [jornada.dados])
-
-  function alterar(dia: DiaSemana, alteracao: Partial<HorarioDia>) {
-    setHorarios((atual) => (atual ? { ...atual, [dia]: { ...atual[dia], ...alteracao } } : atual))
-  }
 
   async function salvar() {
     if (!horarios) return
@@ -49,13 +37,7 @@ export function PainelJornadaPadraoFilial({ filialId, aoAlterar }: { filialId: n
     try {
       await requisitarApi(`/api/agenda/jornadas/filiais/${filialId}`, {
         metodo: 'PUT',
-        corpo: {
-          intervalos: DIAS_SEMANA.filter((dia) => horarios[dia].aberto).map((dia) => ({
-            diaSemana: dia,
-            horaInicio: horarios[dia].horaInicio,
-            horaFim: horarios[dia].horaFim,
-          })),
-        },
+        corpo: { intervalos: converterJornadaParaIntervalos(horarios) },
       })
       setSucesso('Horário padrão atualizado.')
       setEditando(false)
@@ -81,49 +63,15 @@ export function PainelJornadaPadraoFilial({ filialId, aoAlterar }: { filialId: n
       </div>
       <AvisoErro mensagem={erro ?? jornada.erro} />
       <AvisoSucesso mensagem={sucesso} />
-      {horarios && (
+      {horarios && editando && <EditorJornadaSemanal jornada={horarios} aoAlterar={setHorarios} />}
+      {horarios && !editando && (
         <div className="tabela-container">
           <table>
             <tbody>
               {DIAS_SEMANA.map((dia) => (
                 <tr key={dia}>
                   <td>{NOME_DIA_SEMANA[dia]}</td>
-                  {editando ? (
-                    <>
-                      <td>
-                        <label className="linha" style={{ alignItems: 'center' }}>
-                          <input
-                            type="checkbox"
-                            checked={horarios[dia].aberto}
-                            onChange={(e) => alterar(dia, { aberto: e.target.checked })}
-                          />
-                          Aberto
-                        </label>
-                      </td>
-                      <td>
-                        <input
-                          type="time"
-                          step={1800}
-                          value={horarios[dia].horaInicio}
-                          disabled={!horarios[dia].aberto}
-                          onChange={(e) => alterar(dia, { horaInicio: e.target.value })}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="time"
-                          step={1800}
-                          value={horarios[dia].horaFim}
-                          disabled={!horarios[dia].aberto}
-                          onChange={(e) => alterar(dia, { horaFim: e.target.value })}
-                        />
-                      </td>
-                    </>
-                  ) : (
-                    <td className="texto-suave">
-                      {horarios[dia].aberto ? `${horarios[dia].horaInicio} às ${horarios[dia].horaFim}` : 'Fechado'}
-                    </td>
-                  )}
+                  <td className="texto-suave">{descreverHorarioDia(horarios[dia])}</td>
                 </tr>
               ))}
             </tbody>
