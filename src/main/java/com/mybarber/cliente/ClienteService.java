@@ -1,61 +1,85 @@
 package com.mybarber.cliente;
 
-import java.util.List;
+import static com.mybarber.compartilhado.dadospessoais.DadosPessoaisNormalizador.normalizarCpf;
+import static com.mybarber.compartilhado.dadospessoais.DadosPessoaisNormalizador.normalizarEmail;
+import static com.mybarber.compartilhado.dadospessoais.DadosPessoaisNormalizador.normalizarNome;
+import static com.mybarber.compartilhado.dadospessoais.DadosPessoaisNormalizador.normalizarTelefone;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mybarber.compartilhado.excecao.ConflitoDadosException;
 import com.mybarber.compartilhado.excecao.RecursoNaoEncontradoException;
 
-@Service 
+@Service
 public class ClienteService {
-    
+
     private final ClienteRepository clienteRepository;
 
-    public ClienteService(ClienteRepository clienteRepository){
+    public ClienteService(ClienteRepository clienteRepository) {
         this.clienteRepository = clienteRepository;
     }
 
-    public List<Cliente> listarTodos(){
-        return clienteRepository.findAll();
+    @Transactional(readOnly = true)
+    public Page<Cliente> listarAtivos(String nome, Pageable paginacao) {
+        if (nome == null || nome.isBlank()) {
+            return clienteRepository.findAllByAtivoTrue(paginacao);
+        }
+        return clienteRepository.findAllByAtivoTrueAndNomeContainingIgnoreCase(nome.strip(), paginacao);
     }
 
-    public Cliente salvar(Cliente cliente){
+    @Transactional(readOnly = true)
+    public Cliente buscarPorId(Long id) {
+        return clienteRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente não encontrado com o id: " + id));
+    }
 
-        if (clienteRepository.existsByEmail(cliente.getEmail())) {
+    @Transactional
+    public Cliente cadastrar(ClienteCadastroRequest requisicao) {
+        String email = normalizarEmail(requisicao.email());
+        String cpf = normalizarCpf(requisicao.cpf());
+
+        if (clienteRepository.existsByEmail(email)) {
             throw new ConflitoDadosException("Email já cadastrado");
         }
-        if (clienteRepository.existsByCpf(cliente.getCpf())) {
+        if (cpf != null && clienteRepository.existsByCpf(cpf)) {
             throw new ConflitoDadosException("CPF já cadastrado");
         }
 
-        return clienteRepository.save(cliente);
-    }
-
-    public Cliente buscarPorId(Long id){
-        return clienteRepository.findById(id)
-            .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente não encontrado com o id: " + id));
-    }
-
-    public Cliente atualizar(Long id, Cliente clienteAtualizado){
-         
-        Cliente cliente = clienteRepository.findById(id)
-            .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente não encontrando com o id: " + id));
-
-        cliente.setNome(clienteAtualizado.getNome());
-        cliente.setTelefone(clienteAtualizado.getTelefone());
-        cliente.setEmail(clienteAtualizado.getEmail());
-        cliente.setCpf(clienteAtualizado.getCpf());
+        Cliente cliente = new Cliente();
+        cliente.setNome(normalizarNome(requisicao.nome()));
+        cliente.setEmail(email);
+        cliente.setCpf(cpf);
+        cliente.setTelefone(normalizarTelefone(requisicao.telefone()));
 
         return clienteRepository.save(cliente);
     }
 
-    public void deletar(Long id){
+    @Transactional
+    public Cliente atualizar(Long id, ClienteAtualizacaoRequest requisicao) {
+        Cliente cliente = buscarPorId(id);
+        String email = normalizarEmail(requisicao.email());
+        String cpf = normalizarCpf(requisicao.cpf());
 
-        if (!clienteRepository.existsById(id)) {
-            throw new RecursoNaoEncontradoException("Cliente não encontrado com id: " + id);
+        if (clienteRepository.existsByEmailAndIdNot(email, id)) {
+            throw new ConflitoDadosException("Email já cadastrado para outro cliente");
+        }
+        if (cpf != null && clienteRepository.existsByCpfAndIdNot(cpf, id)) {
+            throw new ConflitoDadosException("CPF já cadastrado para outro cliente");
         }
 
-        clienteRepository.deleteById(id);
+        cliente.setNome(normalizarNome(requisicao.nome()));
+        cliente.setEmail(email);
+        cliente.setCpf(cpf);
+        cliente.setTelefone(normalizarTelefone(requisicao.telefone()));
+
+        return clienteRepository.saveAndFlush(cliente);
+    }
+
+    @Transactional
+    public void inativar(Long id) {
+        buscarPorId(id).setAtivo(false);
     }
 }

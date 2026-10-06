@@ -1,70 +1,97 @@
 package com.mybarber.cliente;
 
+import java.time.Instant;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "clientes")
 public class Cliente {
-    
-    @Id 
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank (message = "O nome é obrigatório")
+    @Column(nullable = false, length = 150)
     private String nome;
-    
-    @NotBlank (message = "O telefone é obrigatório")
-    private String telefone;
 
-    @NotBlank (message = "O email é obrigatório")
-    @Email (message = "O email deve ser válido")
-    @Column (unique = true)
+    @Column(nullable = false, length = 254, unique = true)
     private String email;
 
-    @NotBlank (message = "O cpf é obrigatório")
-    @Column (unique = true)
+    @Column(length = 11, unique = true)
     private String cpf;
 
-    public Long getid(){
+    @Column(nullable = false, length = 11)
+    private String telefone;
+
+    @Column(nullable = false)
+    private boolean ativo = true;
+
+    @CreationTimestamp
+    @Column(name = "criado_em", nullable = false, updatable = false)
+    private Instant criadoEm;
+
+    @UpdateTimestamp
+    @Column(name = "atualizado_em", nullable = false)
+    private Instant atualizadoEm;
+
+    public Long getId() {
         return id;
     }
-    public void setId(Long id){
-        this.id = id;
-    }
 
-    public String getNome(){
+    public String getNome() {
         return nome;
     }
-    public void setNome(String nome){
+
+    public void setNome(String nome) {
         this.nome = nome;
     }
 
-    public String getTelefone(){
-        return telefone;
-    }
-    public void setTelefone(String telefone){
-        this.telefone = telefone;
-    }
-
-    public String getEmail(){
+    public String getEmail() {
         return email;
     }
-    public void setEmail(String email){
+
+    public void setEmail(String email) {
         this.email = email;
     }
 
     public String getCpf() {
         return cpf;
     }
+
     public void setCpf(String cpf) {
         this.cpf = cpf;
     }
 
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        this.ativo = ativo;
+    }
+
+    public Instant getCriadoEm() {
+        return criadoEm;
+    }
+
+    public Instant getAtualizadoEm() {
+        return atualizadoEm;
+    }
 }
