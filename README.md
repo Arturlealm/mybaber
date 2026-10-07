@@ -54,11 +54,29 @@ Na primeira execução, o Liquibase cria as tabelas e o sistema cadastra o admin
 | Barbeiro | Meus agendamentos (semana ou mês) e Agenda do dia (concluir atendimento confirmando o valor ou informando desconto) |
 | Administrador | Calendário (fechar/abrir dias para todos ou por barbeiro e horário padrão), Agendamentos (semana ou mês), Agenda do dia, Serviços, Funcionários e Relatórios |
 
+## Publicar no Render (demonstração gratuita)
+
+O arquivo `render.yaml` cria o site e o banco de uma vez. A API e as telas ficam no mesmo endereço.
+
+1. Crie uma conta em https://render.com (pode entrar com o GitHub).
+2. No painel, clique em **New → Blueprint** e escolha o repositório `mybaber`, branch `main`.
+3. Preencha os campos pedidos: `ADMIN_EMAIL`, `ADMIN_TELEFONE` (só números, com DDD) e `ADMIN_SENHA` (mínimo 8 caracteres).
+4. Clique em **Deploy Blueprint**. O primeiro deploy leva alguns minutos.
+5. Abra o endereço `https://mybarber-xxxx.onrender.com` mostrado no serviço e entre em "Sou da equipe" com o administrador.
+
+Plano grátis:
+
+- O site dorme após 15 minutos sem acessos e acorda sozinho ao abrir o link (leva 1 a 2 minutos).
+  Antes de apresentar, abra o link e espere a tela de login aparecer.
+- O banco grátis expira em 30 dias.
+- Emails e lembretes ficam desligados.
+
 ## Variáveis de ambiente
 
 | Variável | Descrição |
 |---|---|
-| `DB_URL` | URL JDBC do PostgreSQL |
+| `DB_URL` | URL JDBC do PostgreSQL (ou `DB_HOST`, `DB_PORTA` e `DB_NOME` separados) |
+| `PORT` | Porta HTTP da aplicação (padrão 8080) |
 | `DB_USUARIO` | Usuário do banco |
 | `DB_SENHA` | Senha do banco |
 | `JWT_SEGREDO` | Segredo de assinatura dos tokens (mínimo 32 caracteres) |
