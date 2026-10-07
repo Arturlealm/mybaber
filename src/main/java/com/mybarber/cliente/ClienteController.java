@@ -30,9 +30,11 @@ import jakarta.validation.Valid;
 public class ClienteController {
 
     private final ClienteService clienteService;
+    private final ClienteBalcaoPropriedades clienteBalcaoPropriedades;
 
-    public ClienteController(ClienteService clienteService) {
+    public ClienteController(ClienteService clienteService, ClienteBalcaoPropriedades clienteBalcaoPropriedades) {
         this.clienteService = clienteService;
+        this.clienteBalcaoPropriedades = clienteBalcaoPropriedades;
     }
 
     @PostMapping
@@ -40,6 +42,15 @@ public class ClienteController {
         Cliente cliente = clienteService.cadastrar(requisicao);
         return ResponseEntity.created(URI.create("/api/clientes/" + cliente.getId()))
                 .body(ClienteResponse.de(cliente));
+    }
+
+    @PostMapping("/balcao")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<ClienteBalcaoResponse> cadastrarNoBalcao(
+            @Valid @RequestBody ClienteCadastroBalcaoRequest requisicao) {
+        Cliente cliente = clienteService.cadastrarNoBalcao(requisicao);
+        return ResponseEntity.created(URI.create("/api/clientes/" + cliente.getId()))
+                .body(new ClienteBalcaoResponse(ClienteResponse.de(cliente), clienteBalcaoPropriedades.senhaPadraoBalcao()));
     }
 
     @GetMapping("/me")

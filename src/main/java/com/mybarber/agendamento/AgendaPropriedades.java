@@ -9,5 +9,6 @@ public record AgendaPropriedades(
         int intervaloMinutos,
         Duration antecedenciaMinimaAgendamento,
         Duration antecedenciaMinimaCancelamentoCliente,
-        int diasMaximosAntecedencia) {
+        int diasMaximosAntecedencia,
+        int diasMaximosRetroativosAdministrador) {
 }

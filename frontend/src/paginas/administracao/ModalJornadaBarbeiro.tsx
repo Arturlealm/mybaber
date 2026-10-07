@@ -68,7 +68,7 @@ export function ModalJornadaBarbeiro({ funcionario, aoFechar, aoSalvar }: Propri
         <h2 id="titulo-jornada-barbeiro">Horário de {funcionario.nome}</h2>
         <AvisoErro mensagem={jornadaBarbeiro.erro ?? jornadaFilial.erro} />
 
-        <label className="linha" style={{ alignItems: 'center' }}>
+        <label className="opcao-marcavel">
           <input
             type="radio"
             name="tipo-jornada"
@@ -77,7 +77,7 @@ export function ModalJornadaBarbeiro({ funcionario, aoFechar, aoSalvar }: Propri
           />
           Seguir o horário padrão da barbearia
         </label>
-        <label className="linha" style={{ alignItems: 'center' }}>
+        <label className="opcao-marcavel">
           <input
             type="radio"
             name="tipo-jornada"

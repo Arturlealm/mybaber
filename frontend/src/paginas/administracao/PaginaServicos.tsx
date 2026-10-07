@@ -253,7 +253,7 @@ export function PaginaServicos() {
             </label>
             <div className="linha">
               {servicos.dados?.map((servico) => (
-                <label key={servico.id} className="linha" style={{ alignItems: 'center' }}>
+                <label key={servico.id} className="opcao-marcavel">
                   <input
                     type="checkbox"
                     checked={novaCombinacao.servicoIds.includes(servico.id)}
