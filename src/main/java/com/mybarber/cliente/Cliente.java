@@ -23,7 +23,7 @@ public class Cliente {
     @Column(nullable = false, length = 150)
     private String nome;
 
-    @Column(nullable = false, length = 254, unique = true)
+    @Column(length = 254, unique = true)
     private String email;
 
     @Column(length = 11, unique = true)
@@ -32,7 +32,7 @@ public class Cliente {
     @Column(nullable = false, length = 11)
     private String telefone;
 
-    @Column(name = "senha_hash", nullable = false, length = 100)
+    @Column(name = "senha_hash", length = 100)
     private String senhaHash;
 
     @Column(nullable = false)

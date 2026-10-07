@@ -62,7 +62,12 @@ public class ClienteService {
         String cpf = normalizarCpf(requisicao.cpf());
 
         if (clienteRepository.existsByEmail(email)) {
-            throw new ConflitoDadosException("Email já cadastrado");
+            boolean cadastradoPelaBarbearia = clienteRepository.findByEmail(email)
+                    .map(existente -> existente.getSenhaHash() == null)
+                    .orElse(false);
+            throw new ConflitoDadosException(cadastradoPelaBarbearia
+                    ? "Você já tem cadastro feito na barbearia. Use \"Esqueci minha senha\" para criar sua senha de acesso"
+                    : "Email já cadastrado");
         }
         if (cpf != null && clienteRepository.existsByCpf(cpf)) {
             throw new ConflitoDadosException("CPF já cadastrado");
@@ -74,6 +79,33 @@ public class ClienteService {
         cliente.setCpf(cpf);
         cliente.setTelefone(normalizarTelefone(requisicao.telefone()));
         cliente.setSenhaHash(passwordEncoder.encode(requisicao.senha()));
+
+        return clienteRepository.save(cliente);
+    }
+
+    /* Cadastro feito pela equipe para quem chega sem conta: sem senha, o cliente cria o acesso depois pelo "Esqueci minha senha" */
+    @Transactional
+    public Cliente cadastrarNoBalcao(ClienteCadastroBalcaoRequest requisicao) {
+        String email = requisicao.email() == null || requisicao.email().isBlank() ? null : normalizarEmail(requisicao.email());
+        String cpf = normalizarCpf(requisicao.cpf());
+        String telefone = normalizarTelefone(requisicao.telefone());
+
+        clienteRepository.findFirstByTelefoneAndAtivoTrue(telefone).ifPresent(existente -> {
+            throw new ConflitoDadosException("Já existe um cliente com este telefone: " + existente.getNome()
+                    + ". Busque pelo telefone para agendar");
+        });
+        if (email != null && clienteRepository.existsByEmail(email)) {
+            throw new ConflitoDadosException("Email já cadastrado para outro cliente");
+        }
+        if (cpf != null && clienteRepository.existsByCpf(cpf)) {
+            throw new ConflitoDadosException("CPF já cadastrado para outro cliente");
+        }
+
+        Cliente cliente = new Cliente();
+        cliente.setNome(normalizarNome(requisicao.nome()));
+        cliente.setEmail(email);
+        cliente.setCpf(cpf);
+        cliente.setTelefone(telefone);
 
         return clienteRepository.save(cliente);
     }

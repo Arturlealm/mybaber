@@ -53,6 +53,7 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
             select a from Agendamento a
             where a.status = com.mybarber.agendamento.StatusAgendamento.AGENDADO
               and a.lembreteEnviadoEm is null
+              and a.cliente.email is not null
               and a.inicio > :agora and a.inicio <= :limite
             order by a.inicio
             """)

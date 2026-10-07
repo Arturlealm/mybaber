@@ -42,6 +42,14 @@ public class ClienteController {
                 .body(ClienteResponse.de(cliente));
     }
 
+    @PostMapping("/balcao")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<ClienteResponse> cadastrarNoBalcao(@Valid @RequestBody ClienteCadastroBalcaoRequest requisicao) {
+        Cliente cliente = clienteService.cadastrarNoBalcao(requisicao);
+        return ResponseEntity.created(URI.create("/api/clientes/" + cliente.getId()))
+                .body(ClienteResponse.de(cliente));
+    }
+
     @GetMapping("/me")
     @PreAuthorize("hasRole('CLIENTE')")
     public ClienteResponse buscarClienteAutenticado(@AuthenticationPrincipal Jwt jwt) {
