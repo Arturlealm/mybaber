@@ -61,7 +61,8 @@ public class SegurancaConfig {
                         .requestMatchers(HttpMethod.GET, "/api/servicos", "/api/servicos/combinacoes").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll())
                 .oauth2ResourceServer(servidorRecursos -> servidorRecursos
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(conversorAutenticacaoJwt()))
                         .authenticationEntryPoint(pontoEntradaNaoAutenticado)
