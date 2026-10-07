@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 
 import { descreverErro, requisitarApi } from '../api/clienteHttp'
 import { AvisoErro, AvisoSucesso } from '../componentes/AvisosOperacao'
+import { LinkVoltar } from '../componentes/LinkVoltar'
 
 type TipoConta = 'CLIENTE' | 'FUNCIONARIO'
 
@@ -35,6 +36,7 @@ export function PaginaEsqueciSenha() {
   return (
     <div className="tela-acesso">
       <form className="cartao pilha" onSubmit={enviar}>
+        <LinkVoltar para="/entrar" />
         <div>
           <h1>Esqueci minha senha</h1>
           <p className="texto-suave">Informe o email da sua conta para receber um link de redefinição.</p>

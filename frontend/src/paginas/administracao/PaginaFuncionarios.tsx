@@ -4,6 +4,7 @@ import { descreverErro, requisitarApi } from '../../api/clienteHttp'
 import type { Funcionario, Pagina, TipoFuncionario } from '../../api/tiposApi'
 import { AvisoErro, AvisoSucesso } from '../../componentes/AvisosOperacao'
 import { formatarTelefone } from '../../compartilhado/formatadores'
+import { aplicarMascaraTelefone } from '../../compartilhado/mascaras'
 import { useConsultaApi } from '../../compartilhado/useConsultaApi'
 import { ModalJornadaBarbeiro } from './ModalJornadaBarbeiro'
 
@@ -91,7 +92,8 @@ export function PaginaFuncionarios() {
               <input
                 type="tel"
                 value={formulario.telefone}
-                onChange={(e) => setFormulario({ ...formulario, telefone: e.target.value })}
+                inputMode="numeric"
+                onChange={(e) => setFormulario({ ...formulario, telefone: aplicarMascaraTelefone(e.target.value) })}
                 placeholder="(11) 91234-5678"
                 required
               />

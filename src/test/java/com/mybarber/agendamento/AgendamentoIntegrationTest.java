@@ -78,6 +78,15 @@ class AgendamentoIntegrationTest {
         Integer idAgendamento = JsonPath.read(agendamento, "$.id");
         assertThat((String) JsonPath.read(agendamento, "$.fim")).isEqualTo(amanha + "T09:30:00");
 
+        String tokenBarbeiro = autenticar("/api/autenticacao/funcionarios/login", "carlos@teste.com", "senhaBarbeiro123");
+        mockMvc.perform(get("/api/agendamentos/periodo")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenBarbeiro)
+                        .param("inicio", amanha.toString())
+                        .param("fim", amanha.plusDays(6).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].cliente.nome").value("João"));
+
         String horarios = mockMvc.perform(get("/api/agendamentos/horarios-disponiveis")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenCliente)
                         .param("funcionarioId", idBarbeiro.toString())

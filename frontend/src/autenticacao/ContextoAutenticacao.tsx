@@ -65,6 +65,6 @@ export function useAutenticacao() {
 
 export function rotaInicialDoPerfil(perfil: PerfilAcesso) {
   if (perfil === 'CLIENTE') return '/agendar'
-  if (perfil === 'BARBEIRO') return '/agenda-do-dia'
+  if (perfil === 'BARBEIRO') return '/agenda'
   return '/administracao/calendario'
 }

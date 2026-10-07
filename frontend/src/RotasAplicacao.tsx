@@ -10,6 +10,7 @@ import { PaginaRelatorios } from './paginas/administracao/PaginaRelatorios'
 import { PaginaServicos } from './paginas/administracao/PaginaServicos'
 import { PaginaNovoAgendamento } from './paginas/cliente/PaginaNovoAgendamento'
 import { PaginaAgendaDoDia } from './paginas/funcionario/PaginaAgendaDoDia'
+import { PaginaAgendaPeriodo } from './paginas/funcionario/PaginaAgendaPeriodo'
 import { PaginaCadastroCliente } from './paginas/PaginaCadastroCliente'
 import { PaginaEntrar } from './paginas/PaginaEntrar'
 import { PaginaEsqueciSenha } from './paginas/PaginaEsqueciSenha'
@@ -35,6 +36,7 @@ export function RotasAplicacao() {
         </Route>
 
         <Route element={<RotaProtegida perfisPermitidos={['BARBEIRO', 'ADMINISTRADOR']} />}>
+          <Route path="/agenda" element={<PaginaAgendaPeriodo />} />
           <Route path="/agenda-do-dia" element={<PaginaAgendaDoDia />} />
         </Route>
 

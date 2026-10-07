@@ -5,6 +5,8 @@ import { descreverErro, requisitarApi } from '../api/clienteHttp'
 import type { Cliente } from '../api/tiposApi'
 import { useAutenticacao } from '../autenticacao/ContextoAutenticacao'
 import { AvisoErro } from '../componentes/AvisosOperacao'
+import { LinkVoltar } from '../componentes/LinkVoltar'
+import { aplicarMascaraCpf, aplicarMascaraTelefone } from '../compartilhado/mascaras'
 
 export function PaginaCadastroCliente() {
   const { entrar } = useAutenticacao()
@@ -38,6 +40,7 @@ export function PaginaCadastroCliente() {
   return (
     <div className="tela-acesso">
       <form className="cartao pilha" onSubmit={enviar}>
+        <LinkVoltar para="/entrar" />
         <div>
           <h1>Criar conta</h1>
           <p className="texto-suave">Cadastre-se para agendar seu horário.</p>
@@ -61,7 +64,8 @@ export function PaginaCadastroCliente() {
           <input
             type="tel"
             value={formulario.telefone}
-            onChange={(e) => alterar('telefone', e.target.value)}
+            inputMode="numeric"
+            onChange={(e) => alterar('telefone', aplicarMascaraTelefone(e.target.value))}
             placeholder="(11) 91234-5678"
             required
             autoComplete="tel"
@@ -69,8 +73,15 @@ export function PaginaCadastroCliente() {
           <span className="campo-ajuda">Usado pela barbearia para falar com você, se necessário.</span>
         </label>
         <label className="campo">
-          CPF <span className="campo-ajuda">(opcional)</span>
-          <input value={formulario.cpf} onChange={(e) => alterar('cpf', e.target.value)} placeholder="000.000.000-00" />
+          <span>
+            CPF <span className="campo-ajuda">(opcional)</span>
+          </span>
+          <input
+            value={formulario.cpf}
+            inputMode="numeric"
+            onChange={(e) => alterar('cpf', aplicarMascaraCpf(e.target.value))}
+            placeholder="000.000.000-00"
+          />
         </label>
         <label className="campo">
           Senha

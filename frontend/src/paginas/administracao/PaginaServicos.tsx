@@ -182,7 +182,9 @@ export function PaginaServicos() {
               </label>
             </div>
             <label className="campo">
-              Descrição <span className="campo-ajuda">(opcional)</span>
+              <span>
+                Descrição <span className="campo-ajuda">(opcional)</span>
+              </span>
               <input
                 value={formularioServico.descricao}
                 onChange={(e) => setFormularioServico({ ...formularioServico, descricao: e.target.value })}

@@ -27,7 +27,7 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
             select a from Agendamento a
             where a.filialId = :filialId
               and a.inicio >= :inicio and a.inicio < :fim
-            order by a.funcionario.nome, a.inicio
+            order by a.inicio, a.funcionario.nome
             """)
     List<Agendamento> buscarDaFilialNoPeriodo(Long filialId, LocalDateTime inicio, LocalDateTime fim);
 
