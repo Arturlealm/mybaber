@@ -45,8 +45,9 @@ public class AgendamentoController {
     public HorariosDisponiveisResponse listarHorariosDisponiveis(
             @RequestParam Long funcionarioId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
-            @RequestParam List<Long> servicoIds) {
-        return horarioDisponivelService.listar(funcionarioId, data, servicoIds);
+            @RequestParam List<Long> servicoIds,
+            @AuthenticationPrincipal Jwt jwt) {
+        return horarioDisponivelService.listar(funcionarioId, data, servicoIds, UsuarioAutenticado.de(jwt).perfil());
     }
 
     @PostMapping

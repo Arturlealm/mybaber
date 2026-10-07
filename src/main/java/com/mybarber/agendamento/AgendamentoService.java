@@ -65,11 +65,15 @@ public class AgendamentoService {
         Funcionario funcionario = funcionarioService.buscarBarbeiroAtivoPorId(requisicao.funcionarioId());
         List<ServicoOferecido> servicos = catalogoServicoService.buscarServicosAtivosParaAtendimento(requisicao.servicoIds());
 
+        if (usuario.isBarbeiro() && !funcionario.getId().equals(usuario.id())) {
+            throw new RegraNegocioException("Barbeiros podem registrar agendamentos apenas na própria agenda");
+        }
+
         Agendamento agendamento = new Agendamento(cliente, funcionario, requisicao.inicio(), servicos);
         int duracaoTotal = agendamento.getItens().stream().mapToInt(AgendamentoItem::getDuracaoMinutos).sum();
 
         boolean horarioDisponivel = horarioDisponivelService
-                .calcular(funcionario, requisicao.inicio().toLocalDate(), duracaoTotal)
+                .calcular(funcionario, requisicao.inicio().toLocalDate(), duracaoTotal, usuario.perfil())
                 .contains(requisicao.inicio().toLocalTime());
         if (!horarioDisponivel) {
             throw new RegraNegocioException("O horário escolhido não está disponível para este barbeiro");
@@ -77,6 +81,9 @@ public class AgendamentoService {
         if (agendamentoRepository.existeAgendamentoDoClienteNoPeriodo(
                 cliente.getId(), agendamento.getInicio(), agendamento.getFim())) {
             throw new RegraNegocioException("O cliente já possui um agendamento neste horário");
+        }
+        if (requisicao.registrarComoRealizado()) {
+            registrarAtendimentoRealizado(agendamento, requisicao, usuario);
         }
 
         try {
@@ -184,6 +191,21 @@ public class AgendamentoService {
 
         agendamento.registrarNaoComparecimento(usuario.id(), Instant.now(relogio));
         return agendamento;
+    }
+
+    private void registrarAtendimentoRealizado(
+            Agendamento agendamento,
+            AgendamentoCriacaoRequest requisicao,
+            UsuarioAutenticado usuario) {
+        if (usuario.isCliente()) {
+            throw new RegraNegocioException("Apenas a equipe pode registrar atendimentos já realizados");
+        }
+        exigirHorarioIniciado(agendamento);
+
+        BigDecimal valorCobrado = requisicao.valorCobrado() == null
+                ? agendamento.getValorTabela()
+                : requisicao.valorCobrado();
+        agendamento.concluir(valorCobrado, textoOuNulo(requisicao.observacao()), usuario.id(), Instant.now(relogio));
     }
 
     private Cliente definirCliente(AgendamentoCriacaoRequest requisicao, UsuarioAutenticado usuario) {
