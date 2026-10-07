@@ -51,7 +51,8 @@ public class AutenticacaoService {
         }
 
         controleTentativasLogin.registrarSucesso(chaveTentativas);
-        return tokenAcessoService.gerar(cliente.getId(), cliente.getNome(), PerfilAcesso.CLIENTE);
+        return tokenAcessoService.gerar(
+                cliente.getId(), cliente.getNome(), PerfilAcesso.CLIENTE, cliente.isUsaSenhaPadrao());
     }
 
     @Transactional(readOnly = true)
@@ -71,7 +72,7 @@ public class AutenticacaoService {
 
         controleTentativasLogin.registrarSucesso(chaveTentativas);
         return tokenAcessoService.gerar(
-                funcionario.getId(), funcionario.getNome(), funcionario.getTipo().getPerfilAcesso());
+                funcionario.getId(), funcionario.getNome(), funcionario.getTipo().getPerfilAcesso(), false);
     }
 
     /* Compara com um hash fictício quando o usuário não existe para não revelar emails cadastrados pelo tempo de resposta */

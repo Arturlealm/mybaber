@@ -2,6 +2,7 @@ package com.mybarber.cliente;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,6 +58,36 @@ class ClienteBalcaoIntegrationTest {
                 """)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.mensagem").value(containsString("Pedro Primeira Vez")));
+    }
+
+    @Test
+    void clienteComSenhaPadraoDeveSerAvisadoNoLoginEPoderTrocarSemInformarASenhaAtual() throws Exception {
+        cadastrarNoBalcao(autenticarAdministrador(), """
+                {"nome": "Caio", "telefone": "11933334444", "email": "caio@teste.com"}
+                """).andExpect(status().isCreated());
+
+        String resposta = entrarComoCliente("caio@teste.com", "123456789")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.usaSenhaPadrao").value(true))
+                .andReturn().getResponse().getContentAsString();
+        String tokenCliente = JsonPath.read(resposta, "$.tokenAcesso");
+
+        trocarSenhaPadrao(tokenCliente, "123456789").andExpect(status().isUnprocessableContent());
+        trocarSenhaPadrao(tokenCliente, "minhaSenhaNova1").andExpect(status().isNoContent());
+
+        entrarComoCliente("caio@teste.com", "123456789").andExpect(status().isUnauthorized());
+        entrarComoCliente("caio@teste.com", "minhaSenhaNova1")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.usaSenhaPadrao").value(false));
+
+        trocarSenhaPadrao(tokenCliente, "outraSenha123").andExpect(status().isUnprocessableContent());
+    }
+
+    private ResultActions trocarSenhaPadrao(String token, String novaSenha) throws Exception {
+        return mockMvc.perform(put("/api/clientes/me/senha-padrao")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"novaSenha\": \"%s\"}".formatted(novaSenha)));
     }
 
     @Test

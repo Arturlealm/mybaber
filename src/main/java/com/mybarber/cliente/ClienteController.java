@@ -77,6 +77,15 @@ public class ClienteController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/me/senha-padrao")
+    @PreAuthorize("hasRole('CLIENTE')")
+    public ResponseEntity<Void> trocarSenhaPadraoClienteAutenticado(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody ClienteTrocaSenhaPadraoRequest requisicao) {
+        clienteService.trocarSenhaPadrao(idClienteAutenticado(jwt), requisicao);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     @PreAuthorize("hasAnyRole('BARBEIRO', 'ADMINISTRADOR')")
     public PaginaResponse<ClienteResponse> listarAtivos(
