@@ -81,6 +81,20 @@ public class AgendamentoController {
                 .toList();
     }
 
+    @GetMapping("/periodo")
+    @PreAuthorize("hasAnyRole('BARBEIRO', 'ADMINISTRADOR')")
+    public List<AgendamentoResponse> listarAgendaDoPeriodo(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
+            @RequestParam(required = false) Long filialId,
+            @RequestParam(required = false) Long funcionarioId,
+            @AuthenticationPrincipal Jwt jwt) {
+        return agendamentoService.listarAgendaDoPeriodo(inicio, fim, filialId, funcionarioId, UsuarioAutenticado.de(jwt))
+                .stream()
+                .map(AgendamentoResponse::de)
+                .toList();
+    }
+
     @GetMapping("/{id}")
     public AgendamentoResponse buscar(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
         return AgendamentoResponse.de(agendamentoService.buscar(id, UsuarioAutenticado.de(jwt)));

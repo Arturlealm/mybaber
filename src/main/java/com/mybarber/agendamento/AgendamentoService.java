@@ -5,6 +5,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,6 +28,8 @@ import com.mybarber.funcionario.FuncionarioService;
 
 @Service
 public class AgendamentoService {
+
+    private static final int QUANTIDADE_MAXIMA_DIAS_AGENDA = 62;
 
     private final AgendamentoRepository agendamentoRepository;
     private final HorarioDisponivelService horarioDisponivelService;
@@ -108,17 +111,36 @@ public class AgendamentoService {
             Long filialId,
             Long funcionarioId,
             UsuarioAutenticado usuario) {
-        LocalDateTime inicioDia = data.atStartOfDay();
-        LocalDateTime fimDia = data.plusDays(1).atStartOfDay();
+        return listarAgendaDoPeriodo(data, data, filialId, funcionarioId, usuario);
+    }
+
+    /* O barbeiro sempre vê apenas a própria agenda; o administrador pode filtrar por barbeiro ou ver a filial inteira */
+    @Transactional(readOnly = true)
+    public List<Agendamento> listarAgendaDoPeriodo(
+            LocalDate inicio,
+            LocalDate fim,
+            Long filialId,
+            Long funcionarioId,
+            UsuarioAutenticado usuario) {
+        if (fim.isBefore(inicio)) {
+            throw new RegraNegocioException("A data final deve ser igual ou posterior à data inicial");
+        }
+        if (ChronoUnit.DAYS.between(inicio, fim) >= QUANTIDADE_MAXIMA_DIAS_AGENDA) {
+            throw new RegraNegocioException(
+                    "O período da agenda deve ter no máximo " + QUANTIDADE_MAXIMA_DIAS_AGENDA + " dias");
+        }
+
+        LocalDateTime inicioPeriodo = inicio.atStartOfDay();
+        LocalDateTime fimPeriodo = fim.plusDays(1).atStartOfDay();
 
         Long idFuncionario = usuario.isBarbeiro() ? usuario.id() : funcionarioId;
         if (idFuncionario != null) {
             return agendamentoRepository.buscarDoFuncionarioNoPeriodo(
-                    idFuncionario, inicioDia, fimDia, List.of(StatusAgendamento.values()));
+                    idFuncionario, inicioPeriodo, fimPeriodo, List.of(StatusAgendamento.values()));
         }
 
         Long idFilial = filialService.buscarAtivaOuPadrao(filialId).getId();
-        return agendamentoRepository.buscarDaFilialNoPeriodo(idFilial, inicioDia, fimDia);
+        return agendamentoRepository.buscarDaFilialNoPeriodo(idFilial, inicioPeriodo, fimPeriodo);
     }
 
     @Transactional
