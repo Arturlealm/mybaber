@@ -51,8 +51,8 @@ Na primeira execução, o Liquibase cria as tabelas e o sistema cadastra o admin
 | Perfil | Telas |
 |---|---|
 | Cliente | Agendar (serviço, barbeiro, dia e horário) e Meus agendamentos |
-| Barbeiro | Agenda do dia (concluir atendimento confirmando o valor ou informando desconto) |
-| Administrador | Calendário (fechar/abrir dias para todos ou por barbeiro e horário padrão), Agenda do dia, Serviços, Funcionários e Relatórios |
+| Barbeiro | Meus agendamentos (semana ou mês) e Agenda do dia (concluir atendimento confirmando o valor ou informando desconto) |
+| Administrador | Calendário (fechar/abrir dias para todos ou por barbeiro e horário padrão), Agendamentos (semana ou mês), Agenda do dia, Serviços, Funcionários e Relatórios |
 
 ## Variáveis de ambiente
 
@@ -154,6 +154,7 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
 | POST | `/api/agendamentos` | Autenticado (funcionário informa o `clienteId`) |
 | GET | `/api/agendamentos/me` | Cliente (histórico) |
 | GET | `/api/agendamentos/agenda-do-dia?data=` | Barbeiro (própria agenda) e administrador |
+| GET | `/api/agendamentos/periodo?inicio=&fim=` | Barbeiro (própria agenda) e administrador, até 62 dias |
 | GET | `/api/agendamentos/{id}` | Envolvidos e administrador |
 | PATCH | `/api/agendamentos/{id}/cancelamento` | Cliente (até 2h antes) e funcionários |
 | PATCH | `/api/agendamentos/{id}/conclusao` | Barbeiro e administrador |
