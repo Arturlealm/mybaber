@@ -7,5 +7,6 @@ public record TokenAcessoResponse(
         String tipoToken,
         Instant expiraEm,
         PerfilAcesso perfil,
-        String nome) {
+        String nome,
+        boolean usaSenhaPadrao) {
 }

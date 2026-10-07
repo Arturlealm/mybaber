@@ -20,7 +20,7 @@ public class TokenAcessoService {
         this.jwtPropriedades = jwtPropriedades;
     }
 
-    public TokenAcessoResponse gerar(Long idUsuario, String nome, PerfilAcesso perfil) {
+    public TokenAcessoResponse gerar(Long idUsuario, String nome, PerfilAcesso perfil, boolean usaSenhaPadrao) {
         Instant agora = Instant.now();
         Instant expiraEm = agora.plus(jwtPropriedades.expiracao());
 
@@ -36,6 +36,6 @@ public class TokenAcessoService {
         JwsHeader cabecalho = JwsHeader.with(MacAlgorithm.HS256).build();
         String token = jwtEncoder.encode(JwtEncoderParameters.from(cabecalho, claims)).getTokenValue();
 
-        return new TokenAcessoResponse(token, "Bearer", expiraEm, perfil, nome);
+        return new TokenAcessoResponse(token, "Bearer", expiraEm, perfil, nome, usaSenhaPadrao);
     }
 }

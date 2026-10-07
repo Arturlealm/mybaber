@@ -150,6 +150,21 @@ public class ClienteService {
         cliente.setUsaSenhaPadrao(false);
     }
 
+    /* Dispensa a senha atual porque ela é a senha padrão da barbearia, conhecida por quem está logado */
+    @Transactional
+    public void trocarSenhaPadrao(Long id, ClienteTrocaSenhaPadraoRequest requisicao) {
+        Cliente cliente = buscarAtivoPorId(id);
+        if (!cliente.isUsaSenhaPadrao()) {
+            throw new RegraNegocioException("Sua senha já foi personalizada. Use a opção de alterar senha");
+        }
+        if (passwordEncoder.matches(requisicao.novaSenha(), cliente.getSenhaHash())) {
+            throw new RegraNegocioException("A nova senha deve ser diferente da senha padrão");
+        }
+
+        cliente.setSenhaHash(passwordEncoder.encode(requisicao.novaSenha()));
+        cliente.setUsaSenhaPadrao(false);
+    }
+
     @Transactional
     public Cliente redefinirSenha(Long id, String novaSenha) {
         Cliente cliente = buscarAtivoPorId(id);

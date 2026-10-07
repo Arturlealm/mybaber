@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import type { PerfilAcesso } from '../api/tiposApi'
 import { useAutenticacao } from '../autenticacao/ContextoAutenticacao'
+import { ModalTrocaSenhaPadrao } from './ModalTrocaSenhaPadrao'
 
 type ItemMenu = { rota: string; rotulo: string }
 
@@ -71,6 +72,7 @@ export function LayoutAplicacao() {
       </header>
       <main className="conteudo">
         <Outlet />
+        <ModalTrocaSenhaPadrao />
       </main>
     </div>
   )
