@@ -16,6 +16,7 @@ public record ClienteCadastroBalcaoRequest(
         @TelefoneValido
         String telefone,
 
+        @NotBlank(message = "O email é obrigatório")
         @Email(message = "O email deve ser válido")
         @Size(max = 254, message = "O email deve ter no máximo 254 caracteres")
         String email,

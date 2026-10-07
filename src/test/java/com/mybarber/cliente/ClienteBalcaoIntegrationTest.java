@@ -39,33 +39,40 @@ class ClienteBalcaoIntegrationTest {
     private MockMvc mockMvc;
 
     @Test
-    void administradorDeveCadastrarClienteSoComNomeETelefone() throws Exception {
+    void clienteCadastradoNoBalcaoDeveEntrarComASenhaPadrao() throws Exception {
         String token = autenticarAdministrador();
 
         cadastrarNoBalcao(token, """
-                {"nome": "Pedro Primeira Vez", "telefone": "(11) 98888-1111"}
+                {"nome": "Pedro Primeira Vez", "telefone": "(11) 98888-1111", "email": "pedro@teste.com"}
                 """)
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").doesNotExist())
-                .andExpect(jsonPath("$.telefone").value("11988881111"));
+                .andExpect(jsonPath("$.cliente.email").value("pedro@teste.com"))
+                .andExpect(jsonPath("$.cliente.telefone").value("11988881111"))
+                .andExpect(jsonPath("$.senhaInicial").value("123456789"));
+
+        entrarComoCliente("pedro@teste.com", "123456789").andExpect(status().isOk());
 
         cadastrarNoBalcao(token, """
-                {"nome": "Outro Pedro", "telefone": "11988881111"}
+                {"nome": "Outro Pedro", "telefone": "11988881111", "email": "outro@teste.com"}
                 """)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.mensagem").value(containsString("Pedro Primeira Vez")));
     }
 
     @Test
-    void clienteCadastradoNoBalcaoDeveSerOrientadoAUsarEsqueciMinhaSenha() throws Exception {
-        String token = autenticarAdministrador();
-        cadastrarNoBalcao(token, """
+    void emailDeveSerObrigatorioNoCadastroDoBalcao() throws Exception {
+        cadastrarNoBalcao(autenticarAdministrador(), """
+                {"nome": "Sem Email", "telefone": "11977771111"}
+                """)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos[0].campo").value("email"));
+    }
+
+    @Test
+    void autocadastroComEmailDoBalcaoDeveOrientarSobreASenha() throws Exception {
+        cadastrarNoBalcao(autenticarAdministrador(), """
                 {"nome": "Lucas", "telefone": "11977772222", "email": "lucas@teste.com"}
                 """).andExpect(status().isCreated());
-
-        mockMvc.perform(post("/api/autenticacao/clientes/login").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\": \"lucas@teste.com\", \"senha\": \"qualquerSenha1\"}"))
-                .andExpect(status().isUnauthorized());
 
         mockMvc.perform(post("/api/clientes").contentType(MediaType.APPLICATION_JSON).content("""
                         {"nome": "Lucas", "email": "lucas@teste.com", "telefone": "11977772222", "senha": "senhaCliente123"}
@@ -85,10 +92,10 @@ class ClienteBalcaoIntegrationTest {
                                  "senha": "senhaBarbeiro123", "tipo": "BARBEIRO", "realizaAtendimentos": true}
                                 """))
                 .andExpect(status().isCreated());
-        String tokenBarbeiro = autenticar("beto@teste.com", "senhaBarbeiro123");
+        String tokenBarbeiro = autenticarFuncionario("beto@teste.com", "senhaBarbeiro123");
 
         cadastrarNoBalcao(tokenBarbeiro, """
-                {"nome": "Ana", "telefone": "11955556666"}
+                {"nome": "Ana", "telefone": "11955556666", "email": "ana@teste.com"}
                 """).andExpect(status().isForbidden());
     }
 
@@ -99,11 +106,17 @@ class ClienteBalcaoIntegrationTest {
                 .content(corpo));
     }
 
-    private String autenticarAdministrador() throws Exception {
-        return autenticar("admin@teste.com", "senhaAdmin123");
+    private ResultActions entrarComoCliente(String email, String senha) throws Exception {
+        return mockMvc.perform(post("/api/autenticacao/clientes/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\": \"%s\", \"senha\": \"%s\"}".formatted(email, senha)));
     }
 
-    private String autenticar(String email, String senha) throws Exception {
+    private String autenticarAdministrador() throws Exception {
+        return autenticarFuncionario("admin@teste.com", "senhaAdmin123");
+    }
+
+    private String autenticarFuncionario(String email, String senha) throws Exception {
         String resposta = mockMvc.perform(post("/api/autenticacao/funcionarios/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\": \"%s\", \"senha\": \"%s\"}".formatted(email, senha)))

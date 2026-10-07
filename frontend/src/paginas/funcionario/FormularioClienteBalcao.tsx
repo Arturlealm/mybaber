@@ -7,7 +7,7 @@ import { aplicarMascaraTelefone } from '../../compartilhado/mascaras'
 
 type Propriedades = {
   buscaInicial: string
-  aoCadastrar: (cliente: Cliente) => void
+  aoCadastrar: (cliente: Cliente, senhaInicial: string) => void
   aoCancelar: () => void
 }
 
@@ -25,11 +25,11 @@ export function FormularioClienteBalcao({ buscaInicial, aoCadastrar, aoCancelar 
     setErro(null)
     setEnviando(true)
     try {
-      const cliente = await requisitarApi<Cliente>('/api/clientes/balcao', {
+      const resposta = await requisitarApi<{ cliente: Cliente; senhaInicial: string }>('/api/clientes/balcao', {
         metodo: 'POST',
-        corpo: { nome, telefone, email: email || null },
+        corpo: { nome, telefone, email },
       })
-      aoCadastrar(cliente)
+      aoCadastrar(resposta.cliente, resposta.senhaInicial)
     } catch (falha) {
       setErro(descreverErro(falha))
     } finally {
@@ -56,12 +56,10 @@ export function FormularioClienteBalcao({ buscaInicial, aoCadastrar, aoCancelar 
         />
       </label>
       <label className="campo">
-        <span>
-          Email <span className="campo-ajuda">(opcional)</span>
-        </span>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        Email
+        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         <span className="campo-ajuda">
-          Com o email, o cliente pode criar a senha depois em "Esqueci minha senha" e agendar pelo site.
+          O cliente entra no site com este email e a senha padrão da barbearia.
         </span>
       </label>
       <AvisoErro mensagem={erro} />

@@ -35,6 +35,9 @@ public class Cliente {
     @Column(name = "senha_hash", length = 100)
     private String senhaHash;
 
+    @Column(name = "usa_senha_padrao", nullable = false)
+    private boolean usaSenhaPadrao;
+
     @Column(nullable = false)
     private boolean ativo = true;
 
@@ -88,6 +91,14 @@ public class Cliente {
 
     public void setSenhaHash(String senhaHash) {
         this.senhaHash = senhaHash;
+    }
+
+    public boolean isUsaSenhaPadrao() {
+        return usaSenhaPadrao;
+    }
+
+    public void setUsaSenhaPadrao(boolean usaSenhaPadrao) {
+        this.usaSenhaPadrao = usaSenhaPadrao;
     }
 
     public boolean isAtivo() {

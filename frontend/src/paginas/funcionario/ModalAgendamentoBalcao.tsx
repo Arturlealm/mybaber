@@ -40,6 +40,7 @@ export function ModalAgendamentoBalcao({ dataInicial, ehAdministrador, aoFechar,
   const [clientesEncontrados, setClientesEncontrados] = useState<Cliente[]>([])
   const [buscaRealizada, setBuscaRealizada] = useState(false)
   const [cadastrandoCliente, setCadastrandoCliente] = useState(false)
+  const [senhaInicialCliente, setSenhaInicialCliente] = useState<string | null>(null)
   const [cliente, setCliente] = useState<Cliente | null>(null)
   const [combinacao, setCombinacao] = useState<CombinacaoServico | null>(null)
   const [barbeiroId, setBarbeiroId] = useState<number | null>(null)
@@ -139,20 +140,36 @@ export function ModalAgendamentoBalcao({ dataInicial, ehAdministrador, aoFechar,
         <div className="pilha">
           <h3>Cliente</h3>
           {cliente ? (
-            <div className="item-lista">
-              <span>
-                <strong>{cliente.nome}</strong>{' '}
-                <span className="texto-suave">· {formatarTelefone(cliente.telefone)}</span>
-              </span>
-              <button type="button" className="botao botao-secundario botao-pequeno" onClick={() => setCliente(null)}>
-                Trocar
-              </button>
-            </div>
+            <>
+              <div className="item-lista">
+                <span>
+                  <strong>{cliente.nome}</strong>{' '}
+                  <span className="texto-suave">· {formatarTelefone(cliente.telefone)}</span>
+                </span>
+                <button
+                  type="button"
+                  className="botao botao-secundario botao-pequeno"
+                  onClick={() => {
+                    setCliente(null)
+                    setSenhaInicialCliente(null)
+                  }}
+                >
+                  Trocar
+                </button>
+              </div>
+              {senhaInicialCliente && (
+                <div className="aviso aviso-sucesso">
+                  Cliente cadastrado. Informe o acesso ao site: email <strong>{cliente.email}</strong> e senha{' '}
+                  <strong>{senhaInicialCliente}</strong>. Recomende trocar a senha em "Esqueci minha senha".
+                </div>
+              )}
+            </>
           ) : cadastrandoCliente ? (
             <FormularioClienteBalcao
               buscaInicial={busca.trim()}
-              aoCadastrar={(novoCliente) => {
+              aoCadastrar={(novoCliente, senhaInicial) => {
                 setCliente(novoCliente)
+                setSenhaInicialCliente(senhaInicial)
                 setCadastrandoCliente(false)
                 setBusca('')
               }}

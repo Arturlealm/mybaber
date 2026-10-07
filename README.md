@@ -99,7 +99,7 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
 | Método | Rota | Acesso |
 |---|---|---|
 | POST | `/api/clientes` | Público (cadastro) |
-| POST | `/api/clientes/balcao` | Administrador (cadastro rápido sem senha) |
+| POST | `/api/clientes/balcao` | Administrador (cadastro rápido com senha padrão) |
 | GET | `/api/clientes/me` | Cliente |
 | PUT | `/api/clientes/me` | Cliente |
 | PUT | `/api/clientes/me/senha` | Cliente |
@@ -173,8 +173,9 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
   - barbeiro: horários já passados apenas do dia atual e só na própria agenda;
   - administrador: datas passadas até 90 dias (`mybarber.agenda.dias-maximos-retroativos-administrador`).
   Ao escolher um horário passado, o atendimento pode ser salvo direto como concluído, com o valor cobrado.
-- O administrador cadastra clientes novos no balcão só com nome e telefone (email e CPF opcionais).
-  O cliente fica sem senha; com email informado, ele cria o acesso depois em "Esqueci minha senha".
+- O administrador cadastra clientes novos no balcão com nome, telefone e email (CPF opcional).
+  Email obrigatório. O cliente recebe a senha padrão `123456789` (`SENHA_PADRAO_CLIENTE_BALCAO`), informada ao
+  administrador na tela para repassar; recomenda-se trocar em "Esqueci minha senha", mas o login com a senha padrão funciona.
 - Barbeiros sem horário próprio seguem o horário padrão da barbearia; ambos aceitam pausa para almoço.
 
 ## Envio de emails (redefinição de senha)

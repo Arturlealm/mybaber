@@ -24,8 +24,13 @@ public class ClienteService {
 
     private final ClienteRepository clienteRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ClienteBalcaoPropriedades clienteBalcaoPropriedades;
 
-    public ClienteService(ClienteRepository clienteRepository, PasswordEncoder passwordEncoder) {
+    public ClienteService(
+            ClienteRepository clienteRepository,
+            PasswordEncoder passwordEncoder,
+            ClienteBalcaoPropriedades clienteBalcaoPropriedades) {
+        this.clienteBalcaoPropriedades = clienteBalcaoPropriedades;
         this.clienteRepository = clienteRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -63,10 +68,10 @@ public class ClienteService {
 
         if (clienteRepository.existsByEmail(email)) {
             boolean cadastradoPelaBarbearia = clienteRepository.findByEmail(email)
-                    .map(existente -> existente.getSenhaHash() == null)
+                    .map(existente -> existente.isUsaSenhaPadrao() || existente.getSenhaHash() == null)
                     .orElse(false);
             throw new ConflitoDadosException(cadastradoPelaBarbearia
-                    ? "Você já tem cadastro feito na barbearia. Use \"Esqueci minha senha\" para criar sua senha de acesso"
+                    ? "Você já tem cadastro feito na barbearia. Entre com a senha informada no atendimento ou use \"Esqueci minha senha\" para criar uma nova"
                     : "Email já cadastrado");
         }
         if (cpf != null && clienteRepository.existsByCpf(cpf)) {
@@ -86,7 +91,7 @@ public class ClienteService {
     /* Cadastro feito pela equipe para quem chega sem conta: sem senha, o cliente cria o acesso depois pelo "Esqueci minha senha" */
     @Transactional
     public Cliente cadastrarNoBalcao(ClienteCadastroBalcaoRequest requisicao) {
-        String email = requisicao.email() == null || requisicao.email().isBlank() ? null : normalizarEmail(requisicao.email());
+        String email = normalizarEmail(requisicao.email());
         String cpf = normalizarCpf(requisicao.cpf());
         String telefone = normalizarTelefone(requisicao.telefone());
 
@@ -94,7 +99,7 @@ public class ClienteService {
             throw new ConflitoDadosException("Já existe um cliente com este telefone: " + existente.getNome()
                     + ". Busque pelo telefone para agendar");
         });
-        if (email != null && clienteRepository.existsByEmail(email)) {
+        if (clienteRepository.existsByEmail(email)) {
             throw new ConflitoDadosException("Email já cadastrado para outro cliente");
         }
         if (cpf != null && clienteRepository.existsByCpf(cpf)) {
@@ -106,6 +111,8 @@ public class ClienteService {
         cliente.setEmail(email);
         cliente.setCpf(cpf);
         cliente.setTelefone(telefone);
+        cliente.setSenhaHash(passwordEncoder.encode(clienteBalcaoPropriedades.senhaPadraoBalcao()));
+        cliente.setUsaSenhaPadrao(true);
 
         return clienteRepository.save(cliente);
     }
@@ -140,12 +147,14 @@ public class ClienteService {
         }
 
         cliente.setSenhaHash(passwordEncoder.encode(requisicao.novaSenha()));
+        cliente.setUsaSenhaPadrao(false);
     }
 
     @Transactional
     public Cliente redefinirSenha(Long id, String novaSenha) {
         Cliente cliente = buscarAtivoPorId(id);
         cliente.setSenhaHash(passwordEncoder.encode(novaSenha));
+        cliente.setUsaSenhaPadrao(false);
         return cliente;
     }
 
