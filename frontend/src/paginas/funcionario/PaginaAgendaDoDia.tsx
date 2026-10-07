@@ -15,6 +15,7 @@ import {
 } from '../../compartilhado/formatadores'
 import { NOME_STATUS_AGENDAMENTO } from '../../compartilhado/nomesExibicao'
 import { useConsultaApi } from '../../compartilhado/useConsultaApi'
+import { ModalAgendamentoBalcao } from './ModalAgendamentoBalcao'
 import { ModalConclusaoAtendimento } from './ModalConclusaoAtendimento'
 
 export function PaginaAgendaDoDia() {
@@ -23,6 +24,7 @@ export function PaginaAgendaDoDia() {
   const [data, setData] = useState(hojeIso())
   const [funcionarioId, setFuncionarioId] = useState('')
   const [emConclusao, setEmConclusao] = useState<Agendamento | null>(null)
+  const [agendandoNoBalcao, setAgendandoNoBalcao] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [sucesso, setSucesso] = useState<string | null>(null)
 
@@ -60,6 +62,12 @@ export function PaginaAgendaDoDia() {
     }
   }
 
+  function aoAgendarNoBalcao() {
+    setAgendandoNoBalcao(false)
+    setSucesso('Agendamento criado.')
+    agenda.recarregar()
+  }
+
   function aoConcluirAtendimento() {
     setEmConclusao(null)
     setSucesso('Atendimento concluído.')
@@ -74,6 +82,9 @@ export function PaginaAgendaDoDia() {
           <p>{capitalizar(formatarDataLonga(data))}</p>
         </div>
         <div className="linha">
+          <button type="button" className="botao" onClick={() => setAgendandoNoBalcao(true)}>
+            Novo agendamento
+          </button>
           <button type="button" className="botao botao-secundario" onClick={() => setData(somarDias(data, -1))}>
             ‹ Anterior
           </button>
@@ -184,6 +195,15 @@ export function PaginaAgendaDoDia() {
           })}
         </ul>
       </section>
+
+      {agendandoNoBalcao && (
+        <ModalAgendamentoBalcao
+          dataInicial={data < hojeIso() ? hojeIso() : data}
+          ehAdministrador={ehAdministrador}
+          aoFechar={() => setAgendandoNoBalcao(false)}
+          aoAgendar={aoAgendarNoBalcao}
+        />
+      )}
 
       {emConclusao && (
         <ModalConclusaoAtendimento

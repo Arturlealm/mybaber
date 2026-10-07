@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --cor-fundo: #f5f2ec;
   --cor-superficie: #ffffff;
   --cor-superficie-suave: #faf8f4;
@@ -24,6 +25,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    color-scheme: dark;
     --cor-fundo: #151412;
     --cor-superficie: #1f1d1a;
     --cor-superficie-suave: #262420;

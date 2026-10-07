@@ -96,7 +96,7 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
 | GET | `/api/clientes/me` | Cliente |
 | PUT | `/api/clientes/me` | Cliente |
 | PUT | `/api/clientes/me/senha` | Cliente |
-| GET | `/api/clientes?nome=&page=&size=` | Barbeiro e administrador |
+| GET | `/api/clientes?busca=&page=&size=` (nome ou telefone) | Barbeiro e administrador |
 | GET | `/api/clientes/{id}` | Barbeiro e administrador |
 | PUT | `/api/clientes/{id}` | Administrador |
 | DELETE | `/api/clientes/{id}` | Administrador (inativa) |
@@ -160,6 +160,13 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
 - Prioridade do expediente: ajuste do barbeiro no dia, depois ajuste geral da filial (ex.: feriado), depois a jornada semanal.
 - O banco impede dois agendamentos sobrepostos para o mesmo barbeiro.
 - Na conclusão, o barbeiro confirma o valor de tabela ou informa o valor realmente cobrado (desconto).
+- A equipe pode agendar pelo balcão para clientes cadastrados, buscando por nome ou telefone.
+- Barbeiros sem horário próprio seguem o horário padrão da barbearia; ambos aceitam pausa para almoço.
+
+## Segurança
+
+- Após 5 senhas erradas para o mesmo email, o login fica bloqueado por 15 minutos (`mybarber.autenticacao.*`).
+  O controle é feito em memória: com mais de uma instância da API, cada uma conta as tentativas separadamente.
 
 ## Padrões do projeto
 

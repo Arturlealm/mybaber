@@ -5,6 +5,8 @@ import static com.mybarber.compartilhado.dadospessoais.DadosPessoaisNormalizador
 import static com.mybarber.compartilhado.dadospessoais.DadosPessoaisNormalizador.normalizarNome;
 import static com.mybarber.compartilhado.dadospessoais.DadosPessoaisNormalizador.normalizarTelefone;
 
+import java.util.regex.Pattern;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +20,8 @@ import com.mybarber.compartilhado.excecao.RegraNegocioException;
 @Service
 public class ClienteService {
 
+    private static final Pattern BUSCA_POR_TELEFONE = Pattern.compile("^[\\d\\s()+-]{3,}$");
+
     private final ClienteRepository clienteRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -27,11 +31,14 @@ public class ClienteService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Cliente> listarAtivos(String nome, Pageable paginacao) {
-        if (nome == null || nome.isBlank()) {
+    public Page<Cliente> listarAtivos(String busca, Pageable paginacao) {
+        if (busca == null || busca.isBlank()) {
             return clienteRepository.findAllByAtivoTrue(paginacao);
         }
-        return clienteRepository.findAllByAtivoTrueAndNomeContainingIgnoreCase(nome.strip(), paginacao);
+        if (BUSCA_POR_TELEFONE.matcher(busca.strip()).matches()) {
+            return clienteRepository.findAllByAtivoTrueAndTelefoneContaining(normalizarTelefone(busca), paginacao);
+        }
+        return clienteRepository.findAllByAtivoTrueAndNomeContainingIgnoreCase(busca.strip(), paginacao);
     }
 
     @Transactional(readOnly = true)
