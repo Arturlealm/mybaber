@@ -30,7 +30,7 @@ export type Pagina<T> = {
 export type Cliente = {
   id: number
   nome: string
-  email: string
+  email: string | null
   cpf: string | null
   telefone: string
   ativo: boolean

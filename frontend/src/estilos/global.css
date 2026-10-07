@@ -761,3 +761,14 @@ th.numero {
 .cabecalho-dia a {
   white-space: nowrap;
 }
+
+.horario.horario-passado {
+  border-style: dashed;
+  color: var(--cor-texto-suave);
+  font-weight: 500;
+}
+
+.horario.horario-passado[aria-pressed='true'] {
+  border-style: solid;
+  color: #fff;
+}

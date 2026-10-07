@@ -67,9 +67,9 @@ export function PaginaAgendaDoDia() {
     }
   }
 
-  function aoAgendarNoBalcao() {
+  function aoAgendarNoBalcao(mensagem: string) {
     setAgendandoNoBalcao(false)
-    setSucesso('Agendamento criado.')
+    setSucesso(mensagem)
     agenda.recarregar()
   }
 
@@ -214,7 +214,7 @@ export function PaginaAgendaDoDia() {
 
       {agendandoNoBalcao && (
         <ModalAgendamentoBalcao
-          dataInicial={data < hojeIso() ? hojeIso() : data}
+          dataInicial={!ehAdministrador && data < hojeIso() ? hojeIso() : data}
           ehAdministrador={ehAdministrador}
           aoFechar={() => setAgendandoNoBalcao(false)}
           aoAgendar={aoAgendarNoBalcao}
