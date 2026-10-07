@@ -6,6 +6,7 @@ export type TokenAcesso = {
   expiraEm: string
   perfil: PerfilAcesso
   nome: string
+  usaSenhaPadrao: boolean
 }
 
 export type ErroCampo = {
