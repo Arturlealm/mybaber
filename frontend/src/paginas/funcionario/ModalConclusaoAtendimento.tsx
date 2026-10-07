@@ -84,7 +84,9 @@ export function ModalConclusaoAtendimento({ agendamento, aoFechar, aoConcluir }:
               </p>
             )}
             <label className="campo">
-              Observação <span className="campo-ajuda">(opcional)</span>
+              <span>
+                Observação <span className="campo-ajuda">(opcional)</span>
+              </span>
               <input value={observacao} onChange={(e) => setObservacao(e.target.value)} maxLength={255} />
             </label>
             <button

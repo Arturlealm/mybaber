@@ -653,3 +653,23 @@ th.numero {
     display: none;
   }
 }
+
+.link-voltar {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--cor-texto-suave);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.2rem 0;
+}
+
+.link-voltar:hover {
+  color: var(--cor-destaque-forte);
+}
+
+.link-voltar span {
+  font-size: 1.1rem;
+}
