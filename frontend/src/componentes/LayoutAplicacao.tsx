@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import type { PerfilAcesso } from '../api/tiposApi'
 import { useAutenticacao } from '../autenticacao/ContextoAutenticacao'
+import { ModalTrocaSenhaPadrao } from './ModalTrocaSenhaPadrao'
 
 type ItemMenu = { rota: string; rotulo: string }
 
@@ -10,9 +11,13 @@ const MENU_POR_PERFIL: Record<PerfilAcesso, ItemMenu[]> = {
     { rota: '/agendar', rotulo: 'Agendar' },
     { rota: '/meus-agendamentos', rotulo: 'Meus agendamentos' },
   ],
-  BARBEIRO: [{ rota: '/agenda-do-dia', rotulo: 'Agenda do dia' }],
+  BARBEIRO: [
+    { rota: '/agenda', rotulo: 'Meus agendamentos' },
+    { rota: '/agenda-do-dia', rotulo: 'Agenda do dia' },
+  ],
   ADMINISTRADOR: [
     { rota: '/administracao/calendario', rotulo: 'Calendário' },
+    { rota: '/agenda', rotulo: 'Agendamentos' },
     { rota: '/agenda-do-dia', rotulo: 'Agenda do dia' },
     { rota: '/administracao/servicos', rotulo: 'Serviços' },
     { rota: '/administracao/funcionarios', rotulo: 'Funcionários' },
@@ -67,6 +72,7 @@ export function LayoutAplicacao() {
       </header>
       <main className="conteudo">
         <Outlet />
+        <ModalTrocaSenhaPadrao />
       </main>
     </div>
   )

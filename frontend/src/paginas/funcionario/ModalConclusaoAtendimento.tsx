@@ -61,7 +61,7 @@ export function ModalConclusaoAtendimento({ agendamento, aoFechar, aoConcluir }:
           )}
         </div>
 
-        <label className="linha" style={{ alignItems: 'center', cursor: 'pointer' }}>
+        <label className="opcao-marcavel">
           <input type="checkbox" checked={houveDesconto} onChange={(e) => setHouveDesconto(e.target.checked)} />
           Houve desconto? Informe o valor cobrado
         </label>
@@ -84,7 +84,9 @@ export function ModalConclusaoAtendimento({ agendamento, aoFechar, aoConcluir }:
               </p>
             )}
             <label className="campo">
-              Observação <span className="campo-ajuda">(opcional)</span>
+              <span>
+                Observação <span className="campo-ajuda">(opcional)</span>
+              </span>
               <input value={observacao} onChange={(e) => setObservacao(e.target.value)} maxLength={255} />
             </label>
             <button

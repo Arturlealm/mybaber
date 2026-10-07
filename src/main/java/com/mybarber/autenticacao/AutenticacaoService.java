@@ -18,45 +18,61 @@ public class AutenticacaoService {
     private final FuncionarioRepository funcionarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenAcessoService tokenAcessoService;
+    private final ControleTentativasLogin controleTentativasLogin;
     private final String senhaHashFicticia;
 
     public AutenticacaoService(
             ClienteRepository clienteRepository,
             FuncionarioRepository funcionarioRepository,
             PasswordEncoder passwordEncoder,
-            TokenAcessoService tokenAcessoService) {
+            TokenAcessoService tokenAcessoService,
+            ControleTentativasLogin controleTentativasLogin) {
         this.clienteRepository = clienteRepository;
         this.funcionarioRepository = funcionarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenAcessoService = tokenAcessoService;
+        this.controleTentativasLogin = controleTentativasLogin;
         this.senhaHashFicticia = passwordEncoder.encode("senha-ficticia-tempo-constante");
     }
 
     @Transactional(readOnly = true)
     public TokenAcessoResponse autenticarCliente(LoginRequest requisicao) {
-        Cliente cliente = clienteRepository.findByEmail(normalizarEmail(requisicao.email()))
+        String email = normalizarEmail(requisicao.email());
+        String chaveTentativas = "CLIENTE:" + email;
+        controleTentativasLogin.verificarBloqueio(chaveTentativas);
+
+        Cliente cliente = clienteRepository.findByEmail(email)
                 .filter(Cliente::isAtivo)
                 .orElse(null);
 
         if (!senhaConfere(requisicao.senha(), cliente == null ? null : cliente.getSenhaHash())) {
+            controleTentativasLogin.registrarFalha(chaveTentativas);
             throw new CredenciaisInvalidasException();
         }
 
-        return tokenAcessoService.gerar(cliente.getId(), cliente.getNome(), PerfilAcesso.CLIENTE);
+        controleTentativasLogin.registrarSucesso(chaveTentativas);
+        return tokenAcessoService.gerar(
+                cliente.getId(), cliente.getNome(), PerfilAcesso.CLIENTE, cliente.isUsaSenhaPadrao());
     }
 
     @Transactional(readOnly = true)
     public TokenAcessoResponse autenticarFuncionario(LoginRequest requisicao) {
-        Funcionario funcionario = funcionarioRepository.findByEmail(normalizarEmail(requisicao.email()))
+        String email = normalizarEmail(requisicao.email());
+        String chaveTentativas = "FUNCIONARIO:" + email;
+        controleTentativasLogin.verificarBloqueio(chaveTentativas);
+
+        Funcionario funcionario = funcionarioRepository.findByEmail(email)
                 .filter(Funcionario::isAtivo)
                 .orElse(null);
 
         if (!senhaConfere(requisicao.senha(), funcionario == null ? null : funcionario.getSenhaHash())) {
+            controleTentativasLogin.registrarFalha(chaveTentativas);
             throw new CredenciaisInvalidasException();
         }
 
+        controleTentativasLogin.registrarSucesso(chaveTentativas);
         return tokenAcessoService.gerar(
-                funcionario.getId(), funcionario.getNome(), funcionario.getTipo().getPerfilAcesso());
+                funcionario.getId(), funcionario.getNome(), funcionario.getTipo().getPerfilAcesso(), false);
     }
 
     /* Compara com um hash fictício quando o usuário não existe para não revelar emails cadastrados pelo tempo de resposta */

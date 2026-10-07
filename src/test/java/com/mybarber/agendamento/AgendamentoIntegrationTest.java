@@ -31,6 +31,7 @@ import com.jayway.jsonpath.JsonPath;
 
 @SpringBootTest(properties = {
         "mybarber.jwt.segredo=segredo-de-teste-com-pelo-menos-32-caracteres",
+        "mybarber.lembrete.atraso-inicial=PT1H",
         "mybarber.administrador-inicial.email=admin@teste.com",
         "mybarber.administrador-inicial.telefone=11900000000",
         "mybarber.administrador-inicial.senha=senhaAdmin123"
@@ -76,6 +77,15 @@ class AgendamentoIntegrationTest {
                 """.formatted(idBarbeiro, amanha, idCabelo, idBarba), 201);
         Integer idAgendamento = JsonPath.read(agendamento, "$.id");
         assertThat((String) JsonPath.read(agendamento, "$.fim")).isEqualTo(amanha + "T09:30:00");
+
+        String tokenBarbeiro = autenticar("/api/autenticacao/funcionarios/login", "carlos@teste.com", "senhaBarbeiro123");
+        mockMvc.perform(get("/api/agendamentos/periodo")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenBarbeiro)
+                        .param("inicio", amanha.toString())
+                        .param("fim", amanha.plusDays(6).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].cliente.nome").value("João"));
 
         String horarios = mockMvc.perform(get("/api/agendamentos/horarios-disponiveis")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenCliente)
@@ -141,6 +151,58 @@ class AgendamentoIntegrationTest {
                 .andExpect(jsonPath("$.horarios[0]").value("09:00:00"))
                 .andExpect(jsonPath("$.horarios[5]").value("11:30:00"))
                 .andExpect(jsonPath("$.horarios.length()").value(6));
+    }
+
+    @Test
+    void equipeDeveRegistrarAtendimentosJaRealizadosRespeitandoOLimiteDeCadaPerfil() throws Exception {
+        LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+        LocalDate ontem = hoje.minusDays(1);
+        String tokenAdministrador = autenticar("/api/autenticacao/funcionarios/login", "admin@teste.com", "senhaAdmin123");
+
+        String barbeiro = executar(post("/api/funcionarios"), tokenAdministrador, """
+                {"nome": "Rui", "email": "rui@teste.com", "telefone": "11966665555",
+                 "senha": "senhaBarbeiro123", "tipo": "BARBEIRO", "realizaAtendimentos": true}
+                """, 201);
+        Integer idBarbeiro = JsonPath.read(barbeiro, "$.id");
+        String intervalos = String.join(",", List.of("SEGUNDA", "TERCA", "QUARTA", "QUINTA", "SEXTA", "SABADO", "DOMINGO")
+                .stream()
+                .map(dia -> "{\"diaSemana\": \"%s\", \"horaInicio\": \"00:00\", \"horaFim\": \"23:30\"}".formatted(dia))
+                .toList());
+        executar(put("/api/agenda/jornadas/funcionarios/" + idBarbeiro), tokenAdministrador,
+                "{\"intervalos\": [" + intervalos + "]}", 200);
+
+        String cliente = mockMvc.perform(post("/api/clientes").contentType(MediaType.APPLICATION_JSON).content("""
+                        {"nome": "Marta", "email": "marta@teste.com", "telefone": "11955554444", "senha": "senhaCliente123"}
+                        """))
+                .andReturn().getResponse().getContentAsString();
+        Integer idCliente = JsonPath.read(cliente, "$.id");
+
+        String retroativoAdministrador = executar(post("/api/agendamentos"), tokenAdministrador, """
+                {"funcionarioId": %d, "clienteId": %d, "inicio": "%sT10:00:00", "servicoIds": [1],
+                 "atendimentoRealizado": true, "valorCobrado": 35.00, "observacao": "Desconto de amigo"}
+                """.formatted(idBarbeiro, idCliente, ontem), 201);
+        assertThat((String) JsonPath.read(retroativoAdministrador, "$.status")).isEqualTo("CONCLUIDO");
+        assertThat(((Number) JsonPath.read(retroativoAdministrador, "$.desconto")).doubleValue()).isEqualTo(5.0);
+
+        String tokenBarbeiro = autenticar("/api/autenticacao/funcionarios/login", "rui@teste.com", "senhaBarbeiro123");
+        String retroativoBarbeiro = executar(post("/api/agendamentos"), tokenBarbeiro, """
+                {"funcionarioId": %d, "clienteId": %d, "inicio": "%sT00:00:00", "servicoIds": [1], "atendimentoRealizado": true}
+                """.formatted(idBarbeiro, idCliente, hoje), 201);
+        assertThat((String) JsonPath.read(retroativoBarbeiro, "$.status")).isEqualTo("CONCLUIDO");
+
+        executar(post("/api/agendamentos"), tokenBarbeiro, """
+                {"funcionarioId": %d, "clienteId": %d, "inicio": "%sT11:00:00", "servicoIds": [1]}
+                """.formatted(idBarbeiro, idCliente, ontem), 422);
+
+        String tokenCliente = autenticar("/api/autenticacao/clientes/login", "marta@teste.com", "senhaCliente123");
+        String horariosCliente = mockMvc.perform(get("/api/agendamentos/horarios-disponiveis")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenCliente)
+                        .param("funcionarioId", idBarbeiro.toString())
+                        .param("data", hoje.toString())
+                        .param("servicoIds", "1"))
+                .andReturn().getResponse().getContentAsString();
+        List<String> horariosLivres = JsonPath.read(horariosCliente, "$.horarios");
+        assertThat(horariosLivres).doesNotContain("00:00:00", "00:30:00");
     }
 
     private String jornadaTodosOsDias() {

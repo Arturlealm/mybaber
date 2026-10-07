@@ -182,7 +182,9 @@ export function PaginaServicos() {
               </label>
             </div>
             <label className="campo">
-              Descrição <span className="campo-ajuda">(opcional)</span>
+              <span>
+                Descrição <span className="campo-ajuda">(opcional)</span>
+              </span>
               <input
                 value={formularioServico.descricao}
                 onChange={(e) => setFormularioServico({ ...formularioServico, descricao: e.target.value })}
@@ -251,7 +253,7 @@ export function PaginaServicos() {
             </label>
             <div className="linha">
               {servicos.dados?.map((servico) => (
-                <label key={servico.id} className="linha" style={{ alignItems: 'center' }}>
+                <label key={servico.id} className="opcao-marcavel">
                   <input
                     type="checkbox"
                     checked={novaCombinacao.servicoIds.includes(servico.id)}

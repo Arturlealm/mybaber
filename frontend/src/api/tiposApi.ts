@@ -6,6 +6,7 @@ export type TokenAcesso = {
   expiraEm: string
   perfil: PerfilAcesso
   nome: string
+  usaSenhaPadrao: boolean
 }
 
 export type ErroCampo = {
@@ -30,7 +31,7 @@ export type Pagina<T> = {
 export type Cliente = {
   id: number
   nome: string
-  email: string
+  email: string | null
   cpf: string | null
   telefone: string
   ativo: boolean

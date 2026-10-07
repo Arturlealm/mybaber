@@ -81,6 +81,9 @@ public class Agendamento {
     @Column(name = "motivo_cancelamento", length = 255)
     private String motivoCancelamento;
 
+    @Column(name = "lembrete_enviado_em", insertable = false, updatable = false)
+    private Instant lembreteEnviadoEm;
+
     @OneToMany(mappedBy = "agendamento", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<AgendamentoItem> itens = new ArrayList<>();
 
@@ -181,6 +184,10 @@ public class Agendamento {
 
     public List<AgendamentoItem> getItens() {
         return itens;
+    }
+
+    public Instant getLembreteEnviadoEm() {
+        return lembreteEnviadoEm;
     }
 
     public Instant getCriadoEm() {

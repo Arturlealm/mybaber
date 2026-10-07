@@ -45,8 +45,9 @@ public class AgendamentoController {
     public HorariosDisponiveisResponse listarHorariosDisponiveis(
             @RequestParam Long funcionarioId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
-            @RequestParam List<Long> servicoIds) {
-        return horarioDisponivelService.listar(funcionarioId, data, servicoIds);
+            @RequestParam List<Long> servicoIds,
+            @AuthenticationPrincipal Jwt jwt) {
+        return horarioDisponivelService.listar(funcionarioId, data, servicoIds, UsuarioAutenticado.de(jwt).perfil());
     }
 
     @PostMapping
@@ -76,6 +77,20 @@ public class AgendamentoController {
             @RequestParam(required = false) Long funcionarioId,
             @AuthenticationPrincipal Jwt jwt) {
         return agendamentoService.listarAgendaDoDia(data, filialId, funcionarioId, UsuarioAutenticado.de(jwt))
+                .stream()
+                .map(AgendamentoResponse::de)
+                .toList();
+    }
+
+    @GetMapping("/periodo")
+    @PreAuthorize("hasAnyRole('BARBEIRO', 'ADMINISTRADOR')")
+    public List<AgendamentoResponse> listarAgendaDoPeriodo(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
+            @RequestParam(required = false) Long filialId,
+            @RequestParam(required = false) Long funcionarioId,
+            @AuthenticationPrincipal Jwt jwt) {
+        return agendamentoService.listarAgendaDoPeriodo(inicio, fim, filialId, funcionarioId, UsuarioAutenticado.de(jwt))
                 .stream()
                 .map(AgendamentoResponse::de)
                 .toList();

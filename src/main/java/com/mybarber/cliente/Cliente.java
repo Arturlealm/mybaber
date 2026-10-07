@@ -23,7 +23,7 @@ public class Cliente {
     @Column(nullable = false, length = 150)
     private String nome;
 
-    @Column(nullable = false, length = 254, unique = true)
+    @Column(length = 254, unique = true)
     private String email;
 
     @Column(length = 11, unique = true)
@@ -32,8 +32,11 @@ public class Cliente {
     @Column(nullable = false, length = 11)
     private String telefone;
 
-    @Column(name = "senha_hash", nullable = false, length = 100)
+    @Column(name = "senha_hash", length = 100)
     private String senhaHash;
+
+    @Column(name = "usa_senha_padrao", nullable = false)
+    private boolean usaSenhaPadrao;
 
     @Column(nullable = false)
     private boolean ativo = true;
@@ -88,6 +91,14 @@ public class Cliente {
 
     public void setSenhaHash(String senhaHash) {
         this.senhaHash = senhaHash;
+    }
+
+    public boolean isUsaSenhaPadrao() {
+        return usaSenhaPadrao;
+    }
+
+    public void setUsaSenhaPadrao(boolean usaSenhaPadrao) {
+        this.usaSenhaPadrao = usaSenhaPadrao;
     }
 
     public boolean isAtivo() {

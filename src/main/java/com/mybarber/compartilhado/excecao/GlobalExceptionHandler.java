@@ -17,6 +17,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.mybarber.autenticacao.CredenciaisInvalidasException;
+import com.mybarber.autenticacao.MuitasTentativasLoginException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -41,6 +42,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CredenciaisInvalidasException.class)
     public ResponseEntity<ErroResposta> tratarCredenciaisInvalidas(CredenciaisInvalidasException exception) {
         return responder(HttpStatus.UNAUTHORIZED, exception.getMessage());
+    }
+
+    @ExceptionHandler(MuitasTentativasLoginException.class)
+    public ResponseEntity<ErroResposta> tratarMuitasTentativasLogin(MuitasTentativasLoginException exception) {
+        return responder(HttpStatus.TOO_MANY_REQUESTS, exception.getMessage());
     }
 
     @ExceptionHandler(AuthenticationException.class)

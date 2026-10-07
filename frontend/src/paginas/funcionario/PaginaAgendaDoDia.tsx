@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import { descreverErro, requisitarApi } from '../../api/clienteHttp'
 import type { Agendamento, BarbeiroResumo } from '../../api/tiposApi'
@@ -15,14 +16,20 @@ import {
 } from '../../compartilhado/formatadores'
 import { NOME_STATUS_AGENDAMENTO } from '../../compartilhado/nomesExibicao'
 import { useConsultaApi } from '../../compartilhado/useConsultaApi'
+import { ModalAgendamentoBalcao } from './ModalAgendamentoBalcao'
 import { ModalConclusaoAtendimento } from './ModalConclusaoAtendimento'
 
 export function PaginaAgendaDoDia() {
   const { sessao } = useAutenticacao()
   const ehAdministrador = sessao?.perfil === 'ADMINISTRADOR'
-  const [data, setData] = useState(hojeIso())
+  const [parametros] = useSearchParams()
+  const [data, setData] = useState(() => {
+    const dataInformada = parametros.get('data')
+    return dataInformada && /^\d{4}-\d{2}-\d{2}$/.test(dataInformada) ? dataInformada : hojeIso()
+  })
   const [funcionarioId, setFuncionarioId] = useState('')
   const [emConclusao, setEmConclusao] = useState<Agendamento | null>(null)
+  const [agendandoNoBalcao, setAgendandoNoBalcao] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [sucesso, setSucesso] = useState<string | null>(null)
 
@@ -60,6 +67,12 @@ export function PaginaAgendaDoDia() {
     }
   }
 
+  function aoAgendarNoBalcao(mensagem: string) {
+    setAgendandoNoBalcao(false)
+    setSucesso(mensagem)
+    agenda.recarregar()
+  }
+
   function aoConcluirAtendimento() {
     setEmConclusao(null)
     setSucesso('Atendimento concluído.')
@@ -73,31 +86,45 @@ export function PaginaAgendaDoDia() {
           <h1>Agenda do dia</h1>
           <p>{capitalizar(formatarDataLonga(data))}</p>
         </div>
-        <div className="linha">
-          <button type="button" className="botao botao-secundario" onClick={() => setData(somarDias(data, -1))}>
-            ‹ Anterior
-          </button>
-          <button type="button" className="botao botao-secundario" onClick={() => setData(hojeIso())}>
-            Hoje
-          </button>
-          <button type="button" className="botao botao-secundario" onClick={() => setData(somarDias(data, 1))}>
-            Próximo ›
-          </button>
-          <label className="campo">
-            <input type="date" value={data} onChange={(e) => e.target.value && setData(e.target.value)} />
-          </label>
-          {ehAdministrador && (
+        <div className="barra-ferramentas">
+          <div className="grupo-ferramentas">
+            <button type="button" className="botao" onClick={() => setAgendandoNoBalcao(true)}>
+              Novo agendamento
+            </button>
+          </div>
+          <div className="grupo-ferramentas">
+            <button type="button" className="botao botao-secundario" onClick={() => setData(somarDias(data, -1))}>
+              ‹ Anterior
+            </button>
+            <button type="button" className="botao botao-secundario" onClick={() => setData(hojeIso())}>
+              Hoje
+            </button>
+            <button type="button" className="botao botao-secundario" onClick={() => setData(somarDias(data, 1))}>
+              Próximo ›
+            </button>
+          </div>
+          <div className="grupo-ferramentas">
             <label className="campo">
-              <select value={funcionarioId} onChange={(e) => setFuncionarioId(e.target.value)}>
-                <option value="">Todos os barbeiros</option>
-                {barbeiros.dados?.map((barbeiro) => (
-                  <option key={barbeiro.id} value={barbeiro.id}>
-                    {barbeiro.nome}
-                  </option>
-                ))}
-              </select>
+              <input
+                type="date"
+                aria-label="Data"
+                value={data}
+                onChange={(e) => e.target.value && setData(e.target.value)}
+              />
             </label>
-          )}
+            {ehAdministrador && (
+              <label className="campo">
+                <select aria-label="Barbeiro" value={funcionarioId} onChange={(e) => setFuncionarioId(e.target.value)}>
+                  <option value="">Todos os barbeiros</option>
+                  {barbeiros.dados?.map((barbeiro) => (
+                    <option key={barbeiro.id} value={barbeiro.id}>
+                      {barbeiro.nome}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </div>
         </div>
       </div>
 
@@ -184,6 +211,15 @@ export function PaginaAgendaDoDia() {
           })}
         </ul>
       </section>
+
+      {agendandoNoBalcao && (
+        <ModalAgendamentoBalcao
+          dataInicial={!ehAdministrador && data < hojeIso() ? hojeIso() : data}
+          ehAdministrador={ehAdministrador}
+          aoFechar={() => setAgendandoNoBalcao(false)}
+          aoAgendar={aoAgendarNoBalcao}
+        />
+      )}
 
       {emConclusao && (
         <ModalConclusaoAtendimento

@@ -51,8 +51,8 @@ Na primeira execução, o Liquibase cria as tabelas e o sistema cadastra o admin
 | Perfil | Telas |
 |---|---|
 | Cliente | Agendar (serviço, barbeiro, dia e horário) e Meus agendamentos |
-| Barbeiro | Agenda do dia (concluir atendimento confirmando o valor ou informando desconto) |
-| Administrador | Calendário (fechar/abrir dias para todos ou por barbeiro e horário padrão), Agenda do dia, Serviços, Funcionários e Relatórios |
+| Barbeiro | Meus agendamentos (semana ou mês) e Agenda do dia (concluir atendimento confirmando o valor ou informando desconto) |
+| Administrador | Calendário (fechar/abrir dias para todos ou por barbeiro e horário padrão), Agendamentos (semana ou mês), Agenda do dia, Serviços, Funcionários e Relatórios |
 
 ## Variáveis de ambiente
 
@@ -65,6 +65,10 @@ Na primeira execução, o Liquibase cria as tabelas e o sistema cadastra o admin
 | `JWT_EXPIRACAO` | Tempo de validade do token, por exemplo `8h` |
 | `CORS_ORIGENS` | Origens do frontend permitidas, separadas por vírgula |
 | `ADMIN_NOME`, `ADMIN_EMAIL`, `ADMIN_TELEFONE`, `ADMIN_SENHA` | Dados do administrador inicial |
+| `EMAIL_HABILITADO`, `EMAIL_REMETENTE`, `EMAIL_NOME_REMETENTE` | Envio de emails (desligado por padrão) |
+| `SMTP_HOST`, `SMTP_PORTA`, `SMTP_USUARIO`, `SMTP_SENHA` | Servidor SMTP (Gmail por padrão) |
+| `FRONTEND_URL` | Endereço do frontend usado nos links enviados por email |
+| `LEMBRETE_HABILITADO`, `LEMBRETE_ANTECEDENCIA`, `LEMBRETE_LIMITE_DIARIO` | Lembretes de agendamento por email |
 
 ## Testes
 
@@ -85,6 +89,8 @@ Faça login em **Autenticação**, copie o `tokenAcesso` e clique em **Authorize
 |---|---|---|
 | POST | `/api/autenticacao/clientes/login` | Público |
 | POST | `/api/autenticacao/funcionarios/login` | Público |
+| POST | `/api/autenticacao/redefinicao-senha/solicitacao` | Público (envia o link por email) |
+| POST | `/api/autenticacao/redefinicao-senha` | Público (cria a nova senha com o token do link) |
 
 O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`.
 
@@ -93,10 +99,11 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
 | Método | Rota | Acesso |
 |---|---|---|
 | POST | `/api/clientes` | Público (cadastro) |
+| POST | `/api/clientes/balcao` | Administrador (cadastro rápido com senha padrão) |
 | GET | `/api/clientes/me` | Cliente |
 | PUT | `/api/clientes/me` | Cliente |
 | PUT | `/api/clientes/me/senha` | Cliente |
-| GET | `/api/clientes?nome=&page=&size=` | Barbeiro e administrador |
+| GET | `/api/clientes?busca=&page=&size=` (nome ou telefone) | Barbeiro e administrador |
 | GET | `/api/clientes/{id}` | Barbeiro e administrador |
 | PUT | `/api/clientes/{id}` | Administrador |
 | DELETE | `/api/clientes/{id}` | Administrador (inativa) |
@@ -148,6 +155,7 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
 | POST | `/api/agendamentos` | Autenticado (funcionário informa o `clienteId`) |
 | GET | `/api/agendamentos/me` | Cliente (histórico) |
 | GET | `/api/agendamentos/agenda-do-dia?data=` | Barbeiro (própria agenda) e administrador |
+| GET | `/api/agendamentos/periodo?inicio=&fim=` | Barbeiro (própria agenda) e administrador, até 62 dias |
 | GET | `/api/agendamentos/{id}` | Envolvidos e administrador |
 | PATCH | `/api/agendamentos/{id}/cancelamento` | Cliente (até 2h antes) e funcionários |
 | PATCH | `/api/agendamentos/{id}/conclusao` | Barbeiro e administrador |
@@ -160,6 +168,50 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
 - Prioridade do expediente: ajuste do barbeiro no dia, depois ajuste geral da filial (ex.: feriado), depois a jornada semanal.
 - O banco impede dois agendamentos sobrepostos para o mesmo barbeiro.
 - Na conclusão, o barbeiro confirma o valor de tabela ou informa o valor realmente cobrado (desconto).
+- A equipe pode agendar pelo balcão para clientes cadastrados, buscando por nome ou telefone.
+- Registro retroativo pelo balcão (somente horários vagos e dentro do expediente):
+  - barbeiro: horários já passados apenas do dia atual e só na própria agenda;
+  - administrador: datas passadas até 90 dias (`mybarber.agenda.dias-maximos-retroativos-administrador`).
+  Ao escolher um horário passado, o atendimento pode ser salvo direto como concluído, com o valor cobrado.
+- O administrador cadastra clientes novos no balcão com nome, telefone e email (CPF opcional).
+  Email obrigatório. O cliente recebe a senha padrão `123456789` (`SENHA_PADRAO_CLIENTE_BALCAO`), informada ao
+  administrador na tela para repassar. No login com a senha padrão, o cliente vê o aviso "Deseja trocar?" e pode criar
+  a senha na hora (nova senha e confirmação). Se recusar, o aviso volta no próximo login e a senha padrão continua valendo.
+- Barbeiros sem horário próprio seguem o horário padrão da barbearia; ambos aceitam pausa para almoço.
+
+## Envio de emails (redefinição de senha)
+
+Com `EMAIL_HABILITADO=false` (padrão), nenhum email é enviado: o conteúdo, incluindo o link de redefinição, aparece no log da API.
+
+Para enviar pelo Gmail:
+
+1. Ative a verificação em duas etapas na conta Google que vai enviar os emails.
+2. Crie uma **senha de app** em https://myaccount.google.com/apppasswords.
+3. Preencha no `.env`:
+
+   ```
+   EMAIL_HABILITADO=true
+   EMAIL_REMETENTE=sua-conta@gmail.com
+   SMTP_USUARIO=sua-conta@gmail.com
+   SMTP_SENHA=senha-de-app-gerada
+   FRONTEND_URL=http://localhost:5173
+   ```
+
+O Gmail permite cerca de 500 envios por dia. O link de redefinição vale por 30 minutos e só pode ser usado uma vez.
+
+### Lembretes de agendamento
+
+- Enviados 24h antes do horário (`LEMBRETE_ANTECEDENCIA`), verificando a cada 10 minutos.
+- Agendamentos feitos com menos de 3h de antecedência não recebem lembrete.
+- Limite diário de 300 lembretes (`LEMBRETE_LIMITE_DIARIO`), deixando margem para os emails de redefinição de senha dentro da cota do Gmail. O que passar do limite é enviado quando houver saldo, se ainda estiver dentro da janela.
+- Para desligar: `LEMBRETE_HABILITADO=false`.
+
+Para trocar o Gmail por outro serviço (Brevo, Amazon SES, Resend), basta alterar as variáveis `SMTP_*`: todos oferecem SMTP.
+
+## Segurança
+
+- Após 5 senhas erradas para o mesmo email, o login fica bloqueado por 15 minutos (`mybarber.autenticacao.*`).
+  O controle é feito em memória: com mais de uma instância da API, cada uma conta as tentativas separadamente.
 
 ## Padrões do projeto
 

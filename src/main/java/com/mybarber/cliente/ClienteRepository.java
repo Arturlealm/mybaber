@@ -10,6 +10,8 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     Optional<Cliente> findByEmail(String email);
 
+    Optional<Cliente> findFirstByTelefoneAndAtivoTrue(String telefone);
+
     boolean existsByEmail(String email);
 
     boolean existsByCpf(String cpf);
@@ -21,4 +23,6 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     Page<Cliente> findAllByAtivoTrue(Pageable paginacao);
 
     Page<Cliente> findAllByAtivoTrueAndNomeContainingIgnoreCase(String nome, Pageable paginacao);
+
+    Page<Cliente> findAllByAtivoTrueAndTelefoneContaining(String telefone, Pageable paginacao);
 }

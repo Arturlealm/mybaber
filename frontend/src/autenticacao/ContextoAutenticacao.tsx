@@ -15,6 +15,7 @@ type ValorContextoAutenticacao = {
   sessao: TokenAcesso | null
   entrar: (tipo: TipoLogin, email: string, senha: string) => Promise<TokenAcesso>
   sair: () => void
+  dispensarAvisoSenhaPadrao: () => void
 }
 
 const ContextoAutenticacao = createContext<ValorContextoAutenticacao | null>(null)
@@ -51,7 +52,19 @@ export function ProvedorAutenticacao({ children }: { children: ReactNode }) {
     return () => window.removeEventListener(EVENTO_SESSAO_EXPIRADA, sair)
   }, [sair])
 
-  const valor = useMemo(() => ({ sessao, entrar, sair }), [sessao, entrar, sair])
+  const dispensarAvisoSenhaPadrao = useCallback(() => {
+    setSessao((atual) => {
+      if (!atual) return atual
+      const atualizada = { ...atual, usaSenhaPadrao: false }
+      salvarSessao(atualizada)
+      return atualizada
+    })
+  }, [])
+
+  const valor = useMemo(
+    () => ({ sessao, entrar, sair, dispensarAvisoSenhaPadrao }),
+    [sessao, entrar, sair, dispensarAvisoSenhaPadrao],
+  )
   return <ContextoAutenticacao.Provider value={valor}>{children}</ContextoAutenticacao.Provider>
 }
 
@@ -65,6 +78,6 @@ export function useAutenticacao() {
 
 export function rotaInicialDoPerfil(perfil: PerfilAcesso) {
   if (perfil === 'CLIENTE') return '/agendar'
-  if (perfil === 'BARBEIRO') return '/agenda-do-dia'
+  if (perfil === 'BARBEIRO') return '/agenda'
   return '/administracao/calendario'
 }

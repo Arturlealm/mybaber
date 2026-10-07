@@ -4,7 +4,9 @@ import { descreverErro, requisitarApi } from '../../api/clienteHttp'
 import type { Funcionario, Pagina, TipoFuncionario } from '../../api/tiposApi'
 import { AvisoErro, AvisoSucesso } from '../../componentes/AvisosOperacao'
 import { formatarTelefone } from '../../compartilhado/formatadores'
+import { aplicarMascaraTelefone } from '../../compartilhado/mascaras'
 import { useConsultaApi } from '../../compartilhado/useConsultaApi'
+import { ModalJornadaBarbeiro } from './ModalJornadaBarbeiro'
 
 const FORMULARIO_VAZIO = {
   nome: '',
@@ -23,6 +25,7 @@ export function PaginaFuncionarios() {
   const [formulario, setFormulario] = useState<typeof FORMULARIO_VAZIO | null>(null)
   const [erro, setErro] = useState<string | null>(null)
   const [sucesso, setSucesso] = useState<string | null>(null)
+  const [editandoHorario, setEditandoHorario] = useState<Funcionario | null>(null)
 
   async function cadastrar(evento: FormEvent) {
     evento.preventDefault()
@@ -89,7 +92,8 @@ export function PaginaFuncionarios() {
               <input
                 type="tel"
                 value={formulario.telefone}
-                onChange={(e) => setFormulario({ ...formulario, telefone: e.target.value })}
+                inputMode="numeric"
+                onChange={(e) => setFormulario({ ...formulario, telefone: aplicarMascaraTelefone(e.target.value) })}
                 placeholder="(11) 91234-5678"
                 required
               />
@@ -115,7 +119,7 @@ export function PaginaFuncionarios() {
                 <option value="ADMINISTRADOR">Administrador</option>
               </select>
             </label>
-            <label className="linha" style={{ alignItems: 'center' }}>
+            <label className="opcao-marcavel">
               <input
                 type="checkbox"
                 checked={formulario.realizaAtendimentos}
@@ -160,9 +164,20 @@ export function PaginaFuncionarios() {
                   <td>{funcionario.tipo === 'ADMINISTRADOR' ? 'Administrador' : 'Barbeiro'}</td>
                   <td>{funcionario.realizaAtendimentos ? 'Sim' : 'Não'}</td>
                   <td className="numero">
-                    <button type="button" className="botao botao-perigo botao-pequeno" onClick={() => inativar(funcionario)}>
-                      Inativar
-                    </button>
+                    <div className="linha" style={{ justifyContent: 'flex-end' }}>
+                      {funcionario.realizaAtendimentos && (
+                        <button
+                          type="button"
+                          className="botao botao-secundario botao-pequeno"
+                          onClick={() => setEditandoHorario(funcionario)}
+                        >
+                          Horário
+                        </button>
+                      )}
+                      <button type="button" className="botao botao-perigo botao-pequeno" onClick={() => inativar(funcionario)}>
+                        Inativar
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -170,6 +185,17 @@ export function PaginaFuncionarios() {
           </table>
         </div>
       </section>
+
+      {editandoHorario && (
+        <ModalJornadaBarbeiro
+          funcionario={editandoHorario}
+          aoFechar={() => setEditandoHorario(null)}
+          aoSalvar={(mensagem) => {
+            setEditandoHorario(null)
+            setSucesso(mensagem)
+          }}
+        />
+      )}
     </div>
   )
 }

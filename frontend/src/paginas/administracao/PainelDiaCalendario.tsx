@@ -197,7 +197,9 @@ export function PainelDiaCalendario({ dia, diaPassado, aoAlterar }: Propriedades
             </div>
           )}
           <label className="campo">
-            Motivo <span className="campo-ajuda">(opcional, ex.: Feriado)</span>
+            <span>
+              Motivo <span className="campo-ajuda">(opcional, ex.: Feriado)</span>
+            </span>
             <input
               value={formulario.motivo}
               onChange={(e) => setFormulario({ ...formulario, motivo: e.target.value })}
