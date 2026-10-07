@@ -288,7 +288,7 @@ export function ModalAgendamentoBalcao({ dataInicial, ehAdministrador, aoFechar,
 
         {horarioEscolhidoJaPassou && horarios.dados && (
           <div className="pilha cartao" style={{ background: 'var(--cor-superficie-suave)' }}>
-            <label className="linha" style={{ alignItems: 'center' }}>
+            <label className="opcao-marcavel">
               <input
                 type="checkbox"
                 checked={atendimentoRealizado}
@@ -302,7 +302,7 @@ export function ModalAgendamentoBalcao({ dataInicial, ehAdministrador, aoFechar,
                   <span>Confirme o valor do serviço</span>
                   <strong>{formatarMoeda(horarios.dados.valorTabela)}</strong>
                 </div>
-                <label className="linha" style={{ alignItems: 'center' }}>
+                <label className="opcao-marcavel">
                   <input type="checkbox" checked={houveDesconto} onChange={(e) => setHouveDesconto(e.target.checked)} />
                   Houve desconto? Informe o valor cobrado
                 </label>

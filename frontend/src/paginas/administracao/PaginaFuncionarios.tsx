@@ -119,7 +119,7 @@ export function PaginaFuncionarios() {
                 <option value="ADMINISTRADOR">Administrador</option>
               </select>
             </label>
-            <label className="linha" style={{ alignItems: 'center' }}>
+            <label className="opcao-marcavel">
               <input
                 type="checkbox"
                 checked={formulario.realizaAtendimentos}

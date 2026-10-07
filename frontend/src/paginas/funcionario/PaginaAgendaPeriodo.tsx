@@ -177,7 +177,7 @@ export function PaginaAgendaPeriodo() {
       </div>
 
       <section className="cartao pilha">
-        <label className="linha" style={{ alignItems: 'center', fontSize: '0.9rem' }}>
+        <label className="opcao-marcavel" style={{ fontSize: '0.9rem' }}>
           <input type="checkbox" checked={mostrarCancelados} onChange={(e) => setMostrarCancelados(e.target.checked)} />
           Mostrar cancelados
         </label>
