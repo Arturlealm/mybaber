@@ -99,6 +99,7 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
 | Método | Rota | Acesso |
 |---|---|---|
 | POST | `/api/clientes` | Público (cadastro) |
+| POST | `/api/clientes/balcao` | Administrador (cadastro rápido sem senha) |
 | GET | `/api/clientes/me` | Cliente |
 | PUT | `/api/clientes/me` | Cliente |
 | PUT | `/api/clientes/me/senha` | Cliente |
@@ -168,6 +169,12 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
 - O banco impede dois agendamentos sobrepostos para o mesmo barbeiro.
 - Na conclusão, o barbeiro confirma o valor de tabela ou informa o valor realmente cobrado (desconto).
 - A equipe pode agendar pelo balcão para clientes cadastrados, buscando por nome ou telefone.
+- Registro retroativo pelo balcão (somente horários vagos e dentro do expediente):
+  - barbeiro: horários já passados apenas do dia atual e só na própria agenda;
+  - administrador: datas passadas até 90 dias (`mybarber.agenda.dias-maximos-retroativos-administrador`).
+  Ao escolher um horário passado, o atendimento pode ser salvo direto como concluído, com o valor cobrado.
+- O administrador cadastra clientes novos no balcão só com nome e telefone (email e CPF opcionais).
+  O cliente fica sem senha; com email informado, ele cria o acesso depois em "Esqueci minha senha".
 - Barbeiros sem horário próprio seguem o horário padrão da barbearia; ambos aceitam pausa para almoço.
 
 ## Envio de emails (redefinição de senha)
