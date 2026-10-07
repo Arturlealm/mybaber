@@ -65,6 +65,9 @@ Na primeira execução, o Liquibase cria as tabelas e o sistema cadastra o admin
 | `JWT_EXPIRACAO` | Tempo de validade do token, por exemplo `8h` |
 | `CORS_ORIGENS` | Origens do frontend permitidas, separadas por vírgula |
 | `ADMIN_NOME`, `ADMIN_EMAIL`, `ADMIN_TELEFONE`, `ADMIN_SENHA` | Dados do administrador inicial |
+| `EMAIL_HABILITADO`, `EMAIL_REMETENTE`, `EMAIL_NOME_REMETENTE` | Envio de emails (desligado por padrão) |
+| `SMTP_HOST`, `SMTP_PORTA`, `SMTP_USUARIO`, `SMTP_SENHA` | Servidor SMTP (Gmail por padrão) |
+| `FRONTEND_URL` | Endereço do frontend usado nos links enviados por email |
 
 ## Testes
 
@@ -85,6 +88,8 @@ Faça login em **Autenticação**, copie o `tokenAcesso` e clique em **Authorize
 |---|---|---|
 | POST | `/api/autenticacao/clientes/login` | Público |
 | POST | `/api/autenticacao/funcionarios/login` | Público |
+| POST | `/api/autenticacao/redefinicao-senha/solicitacao` | Público (envia o link por email) |
+| POST | `/api/autenticacao/redefinicao-senha` | Público (cria a nova senha com o token do link) |
 
 O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`.
 
@@ -162,6 +167,26 @@ O token retornado deve ser enviado no cabeçalho `Authorization: Bearer <token>`
 - Na conclusão, o barbeiro confirma o valor de tabela ou informa o valor realmente cobrado (desconto).
 - A equipe pode agendar pelo balcão para clientes cadastrados, buscando por nome ou telefone.
 - Barbeiros sem horário próprio seguem o horário padrão da barbearia; ambos aceitam pausa para almoço.
+
+## Envio de emails (redefinição de senha)
+
+Com `EMAIL_HABILITADO=false` (padrão), nenhum email é enviado: o conteúdo, incluindo o link de redefinição, aparece no log da API.
+
+Para enviar pelo Gmail:
+
+1. Ative a verificação em duas etapas na conta Google que vai enviar os emails.
+2. Crie uma **senha de app** em https://myaccount.google.com/apppasswords.
+3. Preencha no `.env`:
+
+   ```
+   EMAIL_HABILITADO=true
+   EMAIL_REMETENTE=sua-conta@gmail.com
+   SMTP_USUARIO=sua-conta@gmail.com
+   SMTP_SENHA=senha-de-app-gerada
+   FRONTEND_URL=http://localhost:5173
+   ```
+
+O Gmail permite cerca de 500 envios por dia, suficiente para redefinições de senha. O link vale por 30 minutos e só pode ser usado uma vez.
 
 ## Segurança
 

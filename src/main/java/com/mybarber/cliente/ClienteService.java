@@ -111,6 +111,13 @@ public class ClienteService {
     }
 
     @Transactional
+    public Cliente redefinirSenha(Long id, String novaSenha) {
+        Cliente cliente = buscarAtivoPorId(id);
+        cliente.setSenhaHash(passwordEncoder.encode(novaSenha));
+        return cliente;
+    }
+
+    @Transactional
     public void inativar(Long id) {
         buscarPorId(id).setAtivo(false);
     }

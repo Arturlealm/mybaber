@@ -138,6 +138,13 @@ public class FuncionarioService {
     }
 
     @Transactional
+    public Funcionario redefinirSenha(Long id, String novaSenha) {
+        Funcionario funcionario = buscarAtivoPorId(id);
+        funcionario.setSenhaHash(passwordEncoder.encode(novaSenha));
+        return funcionario;
+    }
+
+    @Transactional
     public void inativar(Long id, Long idAdministradorAutenticado) {
         if (id.equals(idAdministradorAutenticado)) {
             throw new RegraNegocioException("Não é possível inativar o próprio usuário");

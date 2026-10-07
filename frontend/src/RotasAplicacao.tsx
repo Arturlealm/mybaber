@@ -12,6 +12,8 @@ import { PaginaNovoAgendamento } from './paginas/cliente/PaginaNovoAgendamento'
 import { PaginaAgendaDoDia } from './paginas/funcionario/PaginaAgendaDoDia'
 import { PaginaCadastroCliente } from './paginas/PaginaCadastroCliente'
 import { PaginaEntrar } from './paginas/PaginaEntrar'
+import { PaginaEsqueciSenha } from './paginas/PaginaEsqueciSenha'
+import { PaginaRedefinirSenha } from './paginas/PaginaRedefinirSenha'
 
 function RedirecionamentoInicial() {
   const { sessao } = useAutenticacao()
@@ -24,6 +26,8 @@ export function RotasAplicacao() {
       <Route element={<LayoutAplicacao />}>
         <Route path="/entrar" element={<PaginaEntrar />} />
         <Route path="/cadastro" element={<PaginaCadastroCliente />} />
+        <Route path="/esqueci-senha" element={<PaginaEsqueciSenha />} />
+        <Route path="/redefinir-senha" element={<PaginaRedefinirSenha />} />
 
         <Route element={<RotaProtegida perfisPermitidos={['CLIENTE']} />}>
           <Route path="/agendar" element={<PaginaNovoAgendamento />} />
